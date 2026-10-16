@@ -29,6 +29,7 @@ export const DEFAULT_SETTINGS: Settings = {
 
 function detectDefaultQuality(): QualityLevel {
   try {
+    if (window.matchMedia?.('(pointer: coarse)').matches) return 'low' // phones and tablets
     const c = document.createElement('canvas')
     const gl = c.getContext('webgl2')
     if (!gl) return 'low'

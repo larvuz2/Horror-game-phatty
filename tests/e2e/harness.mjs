@@ -41,6 +41,7 @@ export const state = (page) =>
       hasBatteries: g.hasBatteries,
       player: [r.player.pos.x, r.player.pos.z].map((v) => +v.toFixed(2)),
       yaw: +r.player.yaw.toFixed(2),
+      pitch: +r.player.pitch.toFixed(2),
       creature: [r.creature.pos.x, r.creature.pos.z].map((v) => +v.toFixed(2)),
       creatureState: r.creature.state,
       observed: r.creature.observed,

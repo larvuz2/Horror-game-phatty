@@ -23,6 +23,8 @@ import { useSettings } from '../systems/SettingsManager'
 import { QUALITY_PRESETS } from '../config/gameConfig'
 import { SIM } from '../systems/runtime'
 
+const TOUCH = typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches
+
 function GameScene() {
   const quality = useSettings((s) => s.quality)
   const phase = useGame((s) => s.phase)
@@ -84,8 +86,10 @@ export function GameCanvas({ texturesReady }: { texturesReady: boolean }) {
   const phase = useGame((s) => s.phase)
   const quality = useSettings((s) => s.quality)
   const q = QUALITY_PRESETS[quality]
-  const [dpr, setDpr] = useState(q.dpr[1])
-  useEffect(() => setDpr(q.dpr[1]), [q.dpr])
+  // Phones report pixel ratios of 2-3; render near native-ish but leave room to scale down.
+  const range: [number, number] = TOUCH ? [0.8, Math.min(1.3, window.devicePixelRatio || 1)] : q.dpr
+  const [dpr, setDpr] = useState(range[1])
+  useEffect(() => setDpr(range[1]), [range[1]])
   const active = phase !== 'MAIN_MENU' && phase !== 'PAUSED' && phase !== 'DEATH_SCREEN' && phase !== 'VICTORY_SCREEN'
 
   return (
@@ -105,8 +109,8 @@ export function GameCanvas({ texturesReady }: { texturesReady: boolean }) {
       <PerformanceMonitor
         bounds={() => [45, 75]}
         flipflops={4}
-        onDecline={() => setDpr((d) => Math.max(q.dpr[0], +(d - 0.15).toFixed(2)))}
-        onIncline={() => setDpr((d) => Math.min(q.dpr[1], +(d + 0.1).toFixed(2)))}
+        onDecline={() => setDpr((d) => Math.max(range[0], +(d - 0.15).toFixed(2)))}
+        onIncline={() => setDpr((d) => Math.min(range[1], +(d + 0.1).toFixed(2)))}
       />
       {texturesReady && (
         <Suspense fallback={null}>

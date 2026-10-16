@@ -33,7 +33,7 @@ export function MainMenu({ onStart, loading }: { onStart: () => void; loading: n
               CREDITS
             </button>
           </nav>
-          <p className="menu-foot">HEADPHONES RECOMMENDED · DESKTOP · MOUSE &amp; KEYBOARD</p>
+          <p className="menu-foot">HEADPHONES RECOMMENDED · MOUSE &amp; KEYBOARD OR TOUCH</p>
         </>
       )}
       {panel === 'settings' && <SettingsMenu onBack={() => go('main')} />}

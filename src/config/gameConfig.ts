@@ -2,7 +2,7 @@
 
 export const GAME_CONFIG = {
   player: {
-    walkSpeed: 1.35, // m/s
+    walkSpeed: 1.45, // m/s
     backwardFactor: 0.75,
     strafeFactor: 0.85,
     acceleration: 4.5, // m/s^2
@@ -17,25 +17,25 @@ export const GAME_CONFIG = {
     headBobAmount: 0.022,
     headBobFrequency: 1.75, // steps per second at full speed (x2 = cycle)
     breathAmount: 0.004,
-    interactDistance: 2.1,
+    interactDistance: 2.4,
   },
 
   creature: {
     height: 2.38,
     activationDelay: 25, // s of play before the creature wakes even without the flashlight
     activationDistance: 5, // m walked from the start that wakes it
-    firstMoveDelay: 1.5, // s of continuous lost visibility before the first move
-    moveDelayMin: 0.8, // later moves
-    moveDelayMax: 1.2,
-    minMoveInterval: 1.0,
-    stepMin: 1.6, // meters per reposition
-    stepMax: 2.6,
-    aggressionStepBonus: 0.5, // extra step length once the player holds the batteries
+    firstMoveDelay: 2.4, // s of continuous lost visibility before the first move
+    moveDelayMin: 1.3, // later moves
+    moveDelayMax: 1.9,
+    minMoveInterval: 1.5,
+    stepMin: 1.3, // meters per reposition
+    stepMax: 2.1,
+    aggressionStepBonus: 0.3, // extra step length once the player holds the batteries
     progressMin: 0.7, // each move must close at least this much distance
-    killDistanceUnseen: 1.45, // a move that would land this close triggers the attack
+    killDistanceUnseen: 1.3, // a move that would land this close triggers the attack
     proximityStart: 2.1, // observed: proximity event begins
     killDistanceObserved: 1.2, // observed: death when the player gets this close
-    attackWarning: 0.55, // s between the critical sound and the attack when unseen
+    attackWarning: 0.8, // s between the critical sound and the attack when unseen
     viewMarginDeg: 7, // extra field-of-view margin counted as "observed" (conservative)
     maxDetectDistance: 30,
     nodeSpacing: 0.9,
@@ -43,8 +43,8 @@ export const GAME_CONFIG = {
   },
 
   interaction: {
-    panelHoldTime: 1.8, // s of holding E on the breaker
-    panelDecay: 0.22, // progress lost per second when released
+    panelHoldTime: 1.5, // s of holding E on the breaker
+    panelDecay: 0.1, // progress lost per second when released
   },
 
   lighting: {

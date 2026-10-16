@@ -8,6 +8,7 @@ import { useGame } from '../systems/GameState'
 import { input } from '../systems/Input'
 import { audio } from '../systems/AudioManager'
 import { startVictory } from '../cinematics/VictoryCinematic'
+import { markers } from '../systems/markers'
 
 type TargetId = 'flashlight' | 'batteries' | 'panel' | 'door'
 
@@ -21,30 +22,75 @@ const CENTERS: Record<TargetId, THREE.Vector3> = {
 const ray = new THREE.Ray()
 const tmp = new THREE.Vector3()
 
-// Ray (from the eye) vs. bounding sphere around each interactable.
+// Forgiving targeting: a ray vs. each interactable's bounding sphere, or — when close — simply
+// looking roughly toward it. The candidate closest to the centre of view wins.
 export function findTarget(camera: THREE.Camera, available: TargetId[]): TargetId | null {
   camera.getWorldPosition(ray.origin)
   camera.getWorldDirection(ray.direction)
   let best: TargetId | null = null
-  let bestT = Infinity
+  let bestScore = Infinity
   for (const id of available) {
     const c = CENTERS[id]
     const r = INTERACTABLES[id].radius
     tmp.copy(c).sub(ray.origin)
+    const dist = tmp.length()
+    if (dist > GAME_CONFIG.player.interactDistance + r) continue
     const t = tmp.dot(ray.direction)
-    if (t < 0 || t > GAME_CONFIG.player.interactDistance + r) continue
+    if (t < 0) continue
+    const angle = Math.acos(THREE.MathUtils.clamp(t / Math.max(dist, 1e-4), -1, 1))
     const d2 = tmp.lengthSq() - t * t
-    if (d2 > r * r) continue
-    if (t < bestT) {
-      bestT = t
+    const rayHit = d2 <= r * r
+    const lookingNear = dist < 1.9 && angle < THREE.MathUtils.degToRad(38)
+    if (!rayHit && !lookingNear) continue
+    const score = angle - (rayHit ? 1 : 0)
+    if (score < bestScore) {
+      bestScore = score
       best = id
     }
   }
   return best
 }
 
+const projected = new THREE.Vector3()
+const LABELS: Record<TargetId, string> = { flashlight: 'PICK UP', batteries: 'PICK UP', panel: 'RESTORE POWER', door: 'OPEN' }
+
+// Screen-space markers for nearby interactables (shown even when not aimed at).
+function updateMarkers(camera: THREE.Camera, available: TargetId[], target: TargetId | null, size: { width: number; height: number }) {
+  const camPos = ray.origin
+  for (const id of ['flashlight', 'batteries', 'panel', 'door'] as TargetId[]) {
+    if (!available.includes(id)) {
+      markers.update(id, null)
+      continue
+    }
+    const c = CENTERS[id]
+    const dist = c.distanceTo(camPos)
+    const show = id === 'door' ? 3 : 5
+    if (dist > show) {
+      markers.update(id, null)
+      continue
+    }
+    projected.copy(c).project(camera)
+    if (projected.z > 1 || Math.abs(projected.x) > 1.1 || Math.abs(projected.y) > 1.1) {
+      markers.update(id, null)
+      continue
+    }
+    const near = dist < GAME_CONFIG.player.interactDistance + INTERACTABLES[id].radius
+    let label = LABELS[id]
+    if (id === 'panel' && !runtime.flashlight.on) label = 'TOO DARK — NEED LIGHT'
+    if (id === 'panel' && runtime.flashlight.on) label = 'HOLD — RESTORE POWER'
+    markers.update(id, {
+      x: (projected.x * 0.5 + 0.5) * size.width,
+      y: (-projected.y * 0.5 + 0.5) * size.height,
+      opacity: THREE.MathUtils.clamp((show - dist) / 1.5, 0, 1) * (id === 'door' ? 0.6 : 1),
+      near,
+      target: id === target,
+      label,
+    })
+  }
+}
+
 export function InteractionSystem() {
-  const { camera } = useThree()
+  const { camera, size } = useThree()
   const strainAt = useRef(0)
   const holdSoundCooldown = useRef(0)
 
@@ -55,6 +101,7 @@ export function InteractionSystem() {
     if (g.phase !== 'PLAYING' || runtime.cinematic.kind) {
       if (g.prompt) g.setPrompt(null)
       it.holding = false
+      markers.hideAll()
       return
     }
     const available: TargetId[] = ['door']
@@ -63,6 +110,7 @@ export function InteractionSystem() {
     if (g.objective !== 'COMPLETED') available.push('panel')
     const target = findTarget(camera, available)
     it.target = target
+    updateMarkers(camera, available, target, size)
     const ePressed = input.pressed('KeyE')
     const eHeld = input.down('KeyE')
 

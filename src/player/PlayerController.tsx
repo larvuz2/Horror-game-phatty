@@ -91,10 +91,19 @@ export function PlayerController() {
       const sens = P.mouseSensitivity * settings.mouseSensitivity * pl.speedFactor ** 0.5
       s.targetYaw -= m.x * sens
       s.targetPitch -= m.y * sens * (settings.invertY ? -1 : 1)
+      const tl = input.consumeTouchLook()
+      const tsens = 0.0042 * settings.mouseSensitivity * pl.speedFactor ** 0.5
+      s.targetYaw -= tl.x * tsens
+      s.targetPitch -= tl.y * tsens * (settings.invertY ? -1 : 1)
       let turn = 0
       if (input.down('ArrowLeft')) turn += 1
       if (input.down('ArrowRight')) turn -= 1
       s.targetYaw += turn * P.keyTurnSpeed * dt * pl.speedFactor
+      // Up/down arrows tilt the view so the room can be browsed from the keyboard alone.
+      let tilt = 0
+      if (input.down('ArrowUp')) tilt += 1
+      if (input.down('ArrowDown')) tilt -= 1
+      s.targetPitch += tilt * P.keyTurnSpeed * 0.8 * dt * (settings.invertY ? -1 : 1)
       s.targetPitch = THREE.MathUtils.clamp(s.targetPitch, -P.pitchLimit, P.pitchLimit)
     }
     const k = 1 - Math.exp(-P.lookDamping * dt)
@@ -104,10 +113,15 @@ export function PlayerController() {
     // --- Move -----------------------------------------------------------------------
     let fx = 0, fz = 0
     if (pl.controlEnabled) {
-      if (input.down('KeyW') || input.down('ArrowUp')) fz += 1
-      if (input.down('KeyS') || input.down('ArrowDown')) fz -= P.backwardFactor
+      if (input.down('KeyW')) fz += 1
+      if (input.down('KeyS')) fz -= P.backwardFactor
       if (input.down('KeyD')) fx += P.strafeFactor
       if (input.down('KeyA')) fx -= P.strafeFactor
+      const tm = input.touchMove
+      if (tm.x || tm.y) {
+        fz += -tm.y * (tm.y > 0 ? P.backwardFactor : 1)
+        fx += tm.x * P.strafeFactor
+      }
     }
     const len = Math.hypot(fx, fz)
     if (len > 1) {

@@ -21,13 +21,14 @@ npm run build      # production build in dist/
 npm run preview    # serve the production build
 ```
 
-Best with headphones, in a dark room. Desktop with mouse and keyboard required.
+Best with headphones, in a dark room. Works with mouse and keyboard, or on phones and tablets with touch controls
+(left thumb: floating joystick, right thumb: drag to look, on-screen E and flashlight buttons). Nearby interactable objects show a marker; it turns into an **E** badge when you are in reach.
 
 | Input | Action |
 | --- | --- |
 | `W A S D` | Move (slow, deliberate; no sprint, no jump) |
 | Mouse | Look |
-| `←` `→` | Slow keyboard turning |
+| Arrow keys | Look around (left/right turn, up/down tilt) |
 | `E` | Interact (hold on the breaker) |
 | `F` / left click | Toggle the flashlight |
 | `Esc` | Pause / release the mouse |

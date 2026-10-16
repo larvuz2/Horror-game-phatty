@@ -27,14 +27,12 @@ export function Hud({ locked }: { locked: boolean }) {
           <MessageView key={m.id} m={m} />
         ))}
       </div>
-      {prompt && (
+      {/* The action itself is labelled on the object's marker; the centre only shows hold progress. */}
+      {prompt && progress > 0 && (
         <div className="prompt">
-          <span>{prompt}</span>
-          {progress > 0 && (
-            <span className="prompt-bar">
-              <span style={{ transform: `scaleX(${progress})` }} />
-            </span>
-          )}
+          <span className="prompt-bar">
+            <span style={{ transform: `scaleX(${progress})` }} />
+          </span>
         </div>
       )}
       {!locked && phase === 'PLAYING' && <div className="click-hint">CLICK TO LOOK AROUND · ESC TO PAUSE</div>}

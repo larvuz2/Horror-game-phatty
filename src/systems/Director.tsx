@@ -27,6 +27,7 @@ export function startRun() {
   }
 }
 
+const TOUCH = typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches
 const fwd = new THREE.Vector3()
 const up = new THREE.Vector3()
 const CLOCK = PROPS.find((p) => p.id === 'clock')!.pos
@@ -81,7 +82,7 @@ export function Director() {
           g.pushMessage('TURN ON THE LIGHTS', 'objective', 4.5)
           window.setTimeout(() => {
             const gg = useGame.getState()
-            if (gg.phase === 'PLAYING' && gg.runId === g.runId) gg.pushMessage('WASD  MOVE     MOUSE  LOOK     E  INTERACT', 'hint', 5.5)
+            if (gg.phase === 'PLAYING' && gg.runId === g.runId) gg.pushMessage(TOUCH ? 'JOYSTICK  MOVE     DRAG  LOOK     E  INTERACT' : 'WASD  MOVE     MOUSE / ARROWS  LOOK     E  INTERACT', 'hint', 5.5)
           }, 5200)
         }
       }

@@ -13,6 +13,8 @@ import { installInput, input } from './systems/Input'
 import { preloadTextures } from './scene/materials'
 import { fader } from './systems/fader'
 import { startRun } from './systems/Director'
+import { markers } from './systems/markers'
+import { TouchControls } from './components/TouchControls'
 
 // Requests pointer lock. Resolves 'locked', 'failed' (browser refused, e.g. right after Esc) or 'unsupported'.
 function lockPointer(): Promise<'locked' | 'failed' | 'unsupported'> {
@@ -44,7 +46,10 @@ function lockPointer(): Promise<'locked' | 'failed' | 'unsupported'> {
   })
 }
 
-const isTouch = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches && !window.matchMedia?.('(pointer: fine)').matches
+const isTouch =
+  typeof window !== 'undefined' &&
+  (window.matchMedia?.('(pointer: coarse)').matches || 'ontouchstart' in window) &&
+  !window.matchMedia?.('(pointer: fine)').matches
 
 export default function App() {
   const phase = useGame((s) => s.phase)
@@ -97,7 +102,7 @@ export default function App() {
     }
     const onCanvasClick = (e: MouseEvent) => {
       const g = useGame.getState()
-      if ((e.target as HTMLElement)?.tagName === 'CANVAS' && g.phase === 'PLAYING' && !document.pointerLockElement) void lockPointer()
+      if ((e.target as HTMLElement)?.tagName === 'CANVAS' && g.phase === 'PLAYING' && !document.pointerLockElement && !isTouch) void lockPointer()
     }
     const onVisibility = () => {
       const g = useGame.getState()
@@ -148,7 +153,8 @@ export default function App() {
     void audio.decodeAll()
     audio.stopAll(0.8)
     audio.play('ui_select', { bus: 'ui', volume: 0.55 })
-    void lockPointer()
+    if (isTouch) document.documentElement.requestFullscreen?.().catch(() => {})
+    else void lockPointer()
     menuMusic.current?.stop(1.2)
     menuMusic.current = null
     setPauseSettings(false)
@@ -168,6 +174,12 @@ export default function App() {
     audio.play('ui_select', { bus: 'ui', volume: 0.4 })
     input.clear()
     setPauseSettings(false)
+    if (isTouch) {
+      input.clear()
+      const g = useGame.getState()
+      g.transition(g.pausedFrom ?? 'PLAYING')
+      return
+    }
     wantResume.current = true
     // Only unpause once we can actually look around again.
     void lockPointer().then((r) => {
@@ -195,19 +207,21 @@ export default function App() {
   return (
     <div className="app">
       <GameCanvas texturesReady={texturesReady} />
+      <div className="markers" ref={(e) => markers.attach(e)} />
       <div className="fader" ref={(e) => fader.attach(e)} />
       {!unlocked ? (
         <button className="screen splash" onClick={unlock}>
           <Logo size="small" />
           <span className="splash-cta">CLICK TO ENTER</span>
           <span className="splash-note">
-            {isTouch ? 'Made for desktop: mouse & keyboard required.' : 'Best with headphones, lights off.'}
+            {isTouch ? 'Best in landscape, with headphones.' : 'Best with headphones, lights off.'}
           </span>
         </button>
       ) : (
         <>
           {phase === 'MAIN_MENU' && <MainMenu onStart={begin} loading={loading} />}
-          {(phase === 'INTRO' || phase === 'PLAYING' || phase === 'VICTORY_CINEMATIC') && <Hud locked={locked} />}
+          {(phase === 'INTRO' || phase === 'PLAYING' || phase === 'VICTORY_CINEMATIC') && <Hud locked={locked || isTouch} />}
+          {isTouch && (phase === 'INTRO' || phase === 'PLAYING') && <TouchControls onPause={() => useGame.getState().transition('PAUSED')} />}
           {phase === 'PAUSED' &&
             (pauseSettings ? (
               <div className="screen pause">

@@ -6,6 +6,8 @@ let mouseDX = 0
 let mouseDY = 0
 let mouseDown = false
 let clickedThisFrame = false
+// Touch controls (virtual joystick + drag-to-look), written by the TouchControls overlay.
+const touch = { moveX: 0, moveY: 0, lookDX: 0, lookDY: 0 }
 
 function onKeyDown(e: KeyboardEvent) {
   if (e.repeat) return
@@ -65,6 +67,24 @@ export const input = {
     mouseDY = 0
     return d
   },
+  // Touch look deltas in pixels since last frame.
+  consumeTouchLook() {
+    const d = { x: touch.lookDX, y: touch.lookDY }
+    touch.lookDX = 0
+    touch.lookDY = 0
+    return d
+  },
+  get touchMove() {
+    return { x: touch.moveX, y: touch.moveY }
+  },
+  setTouchMove(x: number, y: number) {
+    touch.moveX = x
+    touch.moveY = y
+  },
+  addTouchLook(dx: number, dy: number) {
+    touch.lookDX += dx
+    touch.lookDY += dy
+  },
   // Call once at the end of each frame.
   endFrame() {
     pressed.clear()
@@ -76,6 +96,7 @@ export const input = {
     mouseDX = mouseDY = 0
     clickedThisFrame = false
     mouseDown = false
+    touch.moveX = touch.moveY = touch.lookDX = touch.lookDY = 0
   },
   // Test/automation hooks.
   simulateDown(code: string) {
