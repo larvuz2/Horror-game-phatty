@@ -35,7 +35,7 @@ export function ElectricalPanel() {
     }
     if (led.current) {
       const blink = Math.sin(state.clock.elapsedTime * 2.2) > 0.6 ? 1 : 0.15
-      led.current.color.setRGB(0.9, 0.75, 0.45).multiplyScalar(done ? 0 : blink * 2)
+      led.current.color.setRGB(0.9, 0.75, 0.45).multiplyScalar(done ? 0 : blink * 3.5)
     }
     const phase = useGame.getState().phase
     if (audio.ready && !buzz.current && phase === 'PLAYING') {
@@ -72,7 +72,7 @@ export function ElectricalPanel() {
       </group>
       {/* Status lamp */}
       <mesh position={[-size[0] * 0.3, size[1] * 0.92, size[2] / 2 + 0.005]}>
-        <sphereGeometry args={[0.008, 8, 6]} />
+        <sphereGeometry args={[0.013, 10, 8]} />
         <meshBasicMaterial ref={led} color="#e6c070" toneMapped={false} />
       </mesh>
     </group>

@@ -29,7 +29,7 @@ function GameScene() {
   const q = QUALITY_PRESETS[quality]
   return (
     <>
-      <Physics gravity={[0, -9.81, 0]} timeStep={1 / 60} paused={phase === 'PAUSED' || phase === 'MAIN_MENU'}>
+      <Physics gravity={[0, -9.81, 0]} timeStep="vary" paused={phase === 'PAUSED' || phase === 'MAIN_MENU'}>
         <Room />
         <Environment />
         <ElectricalPanel />

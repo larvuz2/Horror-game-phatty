@@ -17,7 +17,6 @@ SETS = {
     "ceiling_concrete": (1024, 2.0, 0.92, 0.08, 0.0, 0.7),
     "metal_painted": (1024, 1.4, 0.6, 0.3, 0.0, 0.9),
     "metal_rust": (1024, 2.5, 0.85, 0.15, 0.0, 0.85),
-    "wood_dirty": (1024, 2.0, 0.85, 0.1, 0.0, 0.85),
 }
 DECALS = ["decal_oil", "decal_water", "decal_grime", "decal_cracks", "decal_footprints"]
 
@@ -68,7 +67,7 @@ def process_set(name, size, nstr, rbase, rvar, gloss, gain):
     hgt = ndimage.gaussian_filter(lum, 1.0, mode="wrap") - ndimage.gaussian_filter(lum, 24, mode="wrap")
     fine = lum - ndimage.gaussian_filter(lum, 2.0, mode="wrap")
     nrm = normal_from_height(hgt * 0.6 + fine * 0.8, nstr)
-    save(nrm, f"{OUT}/{name}_normal.webp", q=90)
+    save(nrm, f"{OUT}/{name}_normal.webp", q=78)
     # Roughness: variation from local luminance; dark stains become glossier (wet look) on the floor.
     loc = (lum - lum.mean()) / (lum.std() + 1e-5)
     rough = rbase + rvar * np.tanh(loc) * 0.5

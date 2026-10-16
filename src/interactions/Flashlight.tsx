@@ -140,6 +140,12 @@ export function Flashlight() {
     [beamLen],
   )
 
+  useEffect(() => () => {
+    beamGeo.dispose()
+    beamMat.dispose()
+    cookie.dispose()
+  }, [beamGeo, beamMat, cookie])
+
   useEffect(() => {
     if (lightRef.current) {
       lightRef.current.target = target

@@ -132,7 +132,7 @@ class AudioManager {
     this.buses.sfx.gain.setTargetAtTime(this.settings.sfx, t, 0.05)
     this.buses.amb.gain.setTargetAtTime(this.settings.sfx, t, 0.05)
     this.buses.ui.gain.setTargetAtTime(this.settings.sfx * 0.8, t, 0.05)
-    this.buses.music.gain.setTargetAtTime(this.settings.music, t, 0.05)
+    this.buses.music.gain.setTargetAtTime(this.settings.music * (this.musicDuck ?? 1), t, 0.05)
   }
 
   url(name: string) {
@@ -321,10 +321,13 @@ class AudioManager {
     this.muffleFilter.frequency.setTargetAtTime(f, this.ctx.currentTime, ramp / 3)
   }
 
-  // Ducks the in-world buses (used for pause).
+  // Ducks the in-world buses and game music (used for pause).
+  private musicDuck = 1
   setWorldLevel(v: number, ramp = 0.3) {
     if (!this.ctx) return
     this.world.gain.setTargetAtTime(v, this.ctx.currentTime, ramp / 3)
+    this.musicDuck = Math.max(v, 0.15)
+    this.buses.music.gain.setTargetAtTime(this.settings.music * this.musicDuck, this.ctx.currentTime, ramp / 3)
   }
 
   stopAll(fade = 0.3) {

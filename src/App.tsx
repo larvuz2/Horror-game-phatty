@@ -14,23 +14,34 @@ import { preloadTextures } from './scene/materials'
 import { fader } from './systems/fader'
 import { startRun } from './systems/Director'
 
-function lockPointer() {
-  const el = document.querySelector('canvas') ?? document.body
-  try {
-    const r = (el.requestPointerLock as (o?: unknown) => Promise<void> | void).call(el, { unadjustedMovement: true })
-    if (r && typeof r.catch === 'function') {
-      r.catch(() => {
-        try {
-          const r2 = el.requestPointerLock() as unknown as Promise<void> | void
-          if (r2 && typeof r2.catch === 'function') r2.catch(() => {})
-        } catch {
-          /* unsupported */
-        }
-      })
+// Requests pointer lock. Resolves 'locked', 'failed' (browser refused, e.g. right after Esc) or 'unsupported'.
+function lockPointer(): Promise<'locked' | 'failed' | 'unsupported'> {
+  const el = (document.querySelector('canvas') ?? document.body) as HTMLElement
+  if (!el.requestPointerLock) return Promise.resolve('unsupported')
+  if (document.pointerLockElement) return Promise.resolve('locked')
+  return new Promise((resolve) => {
+    let done = false
+    const finish = (r: 'locked' | 'failed') => {
+      if (done) return
+      done = true
+      document.removeEventListener('pointerlockchange', onChange)
+      resolve(r)
     }
-  } catch {
-    /* pointer lock unavailable (e.g. automation) */
-  }
+    // Note: no 'pointerlockerror' handling here — the first (raw input) attempt may error and the fallback still succeed.
+    const onChange = () => document.pointerLockElement && finish('locked')
+    document.addEventListener('pointerlockchange', onChange)
+    window.setTimeout(() => finish(document.pointerLockElement ? 'locked' : 'failed'), 1500)
+    const call = (opts?: unknown) => {
+      try {
+        const r = (el.requestPointerLock as (o?: unknown) => Promise<void> | void).call(el, opts)
+        return r && typeof r.then === 'function' ? r : Promise.resolve()
+      } catch (e) {
+        return Promise.reject(e)
+      }
+    }
+    // Raw mouse input where supported, plain lock otherwise.
+    call({ unadjustedMovement: true }).catch(() => call().catch(() => finish('failed')))
+  })
 }
 
 const isTouch = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches && !window.matchMedia?.('(pointer: fine)').matches
@@ -45,6 +56,7 @@ export default function App() {
   const [locked, setLocked] = useState(false)
   const [pauseSettings, setPauseSettings] = useState(false)
   const menuMusic = useRef<Voice | null>(null)
+  const wantResume = useRef(false)
 
   useEffect(() => {
     installInput()
@@ -60,6 +72,15 @@ export default function App() {
     const onChange = () => {
       const isLocked = document.pointerLockElement != null
       setLocked(isLocked)
+      // A lock that arrives late still completes a pending resume.
+      if (isLocked && wantResume.current) {
+        const g = useGame.getState()
+        wantResume.current = false
+        if (g.phase === 'PAUSED') {
+          input.clear()
+          g.transition(g.pausedFrom ?? 'PLAYING')
+        }
+      }
       if (!isLocked) {
         const g = useGame.getState()
         if (g.phase === 'PLAYING' || g.phase === 'INTRO') g.transition('PAUSED')
@@ -76,7 +97,7 @@ export default function App() {
     }
     const onCanvasClick = (e: MouseEvent) => {
       const g = useGame.getState()
-      if ((e.target as HTMLElement)?.tagName === 'CANVAS' && g.phase === 'PLAYING' && !document.pointerLockElement) lockPointer()
+      if ((e.target as HTMLElement)?.tagName === 'CANVAS' && g.phase === 'PLAYING' && !document.pointerLockElement) void lockPointer()
     }
     const onVisibility = () => {
       const g = useGame.getState()
@@ -127,10 +148,11 @@ export default function App() {
     void audio.decodeAll()
     audio.stopAll(0.8)
     audio.play('ui_select', { bus: 'ui', volume: 0.55 })
-    lockPointer()
+    void lockPointer()
     menuMusic.current?.stop(1.2)
     menuMusic.current = null
     setPauseSettings(false)
+    input.clear()
     startRun()
   }, [])
 
@@ -141,13 +163,32 @@ export default function App() {
     useGame.setState({ phase: 'MAIN_MENU', pausedFrom: null, menuPanel: 'main', prompt: null, messages: [] })
   }, [])
 
+  const [resumeFailed, setResumeFailed] = useState(false)
   const resume = useCallback(() => {
     audio.play('ui_select', { bus: 'ui', volume: 0.4 })
-    lockPointer()
-    const g = useGame.getState()
-    g.transition(g.pausedFrom ?? 'PLAYING')
+    input.clear()
     setPauseSettings(false)
+    wantResume.current = true
+    // Only unpause once we can actually look around again.
+    void lockPointer().then((r) => {
+      const g = useGame.getState()
+      if (g.phase !== 'PAUSED') return
+      if (r === 'failed') {
+        if (wantResume.current) setResumeFailed(true)
+        return
+      }
+      wantResume.current = false
+      setResumeFailed(false)
+      input.clear()
+      g.transition(g.pausedFrom ?? 'PLAYING')
+    })
   }, [])
+  useEffect(() => {
+    if (phase !== 'PAUSED') {
+      setResumeFailed(false)
+      wantResume.current = false
+    }
+  }, [phase])
 
   const loading = (texP + audioP + modelP / 100) / 3
 
@@ -173,7 +214,7 @@ export default function App() {
                 <SettingsMenu onBack={() => setPauseSettings(false)} />
               </div>
             ) : (
-              <PauseMenu onResume={resume} onRestart={begin} onMenu={toMenu} onSettings={() => setPauseSettings(true)} />
+              <PauseMenu note={resumeFailed ? 'THE BROWSER NEEDS A MOMENT — CLICK RESUME AGAIN' : null} onResume={resume} onRestart={begin} onMenu={toMenu} onSettings={() => setPauseSettings(true)} />
             ))}
           {phase === 'DEATH_SCREEN' && <DeathScreen onRetry={begin} onMenu={toMenu} />}
           {phase === 'VICTORY_SCREEN' && <VictoryScreen onRetry={begin} onMenu={toMenu} />}

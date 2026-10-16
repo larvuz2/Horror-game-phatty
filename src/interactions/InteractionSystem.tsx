@@ -137,12 +137,14 @@ export function InteractionSystem() {
   return null
 }
 
-// setTimeout that is dropped if the run changed (retry/restart) or the game is no longer being played.
+// Delayed action measured in play time: it waits through pauses and dies with the run.
 export function later(runId: number, ms: number, fn: () => void) {
-  window.setTimeout(() => {
-    const g = useGame.getState()
-    if (g.runId === runId && (g.phase === 'PLAYING' || g.phase === 'PAUSED')) fn()
-  }, ms)
+  runtime.timers.push({
+    at: runtime.time + ms / 1000,
+    fn: () => {
+      if (useGame.getState().runId === runId) fn()
+    },
+  })
 }
 
 function powerFlashlight(runId: number) {

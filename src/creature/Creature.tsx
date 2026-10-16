@@ -80,6 +80,7 @@ export interface CreatureRig {
   poseUp: Map<THREE.Bone, THREE.Quaternion>
   eyeMat: THREE.MeshBasicMaterial
   glowMat: THREE.SpriteMaterial
+  eyeGeo: THREE.SphereGeometry
   bodyMat: THREE.MeshStandardMaterial
   headBone: THREE.Bone
 }
@@ -106,39 +107,45 @@ export function buildCreatureRig(source: THREE.Object3D): CreatureRig {
   const headIdxs = new Set(['Head', 'headfront', 'head_end'].map((n) => skinned.skeleton.bones.indexOf(b(n))).filter((i) => i >= 0))
   const neckIdx = skinned.skeleton.bones.indexOf(neck)
   const geo = skinned.geometry
-  const posAttr = geo.getAttribute('position')
-  const skinIdx = geo.getAttribute('skinIndex')
-  const skinW = geo.getAttribute('skinWeight')
-  const mask = new Float32Array(posAttr.count)
-  const v = new THREE.Vector3()
-  skinned.updateMatrixWorld(true)
-  skinned.skeleton.update()
-  const headPts: THREE.Vector3[] = []
-  const hb = new THREE.Box3()
-  for (let i = 0; i < posAttr.count; i++) {
-    let wh = 0, wn = 0
-    for (let k = 0; k < 4; k++) {
-      const bi = skinIdx.getComponent(i, k)
-      const w = skinW.getComponent(i, k)
-      if (headIdxs.has(bi)) wh += w
-      else if (bi === neckIdx) wn += w
+  type FaceData = { frontPoint: THREE.Vector3; headSize: number }
+  let face = geo.userData.faceData as FaceData | undefined
+  if (!face) {
+    const posAttr = geo.getAttribute('position')
+    const skinIdx = geo.getAttribute('skinIndex')
+    const skinW = geo.getAttribute('skinWeight')
+    const mask = new Float32Array(posAttr.count)
+    const v = new THREE.Vector3()
+    skinned.updateMatrixWorld(true)
+    skinned.skeleton.update()
+    const headPts: THREE.Vector3[] = []
+    const hb = new THREE.Box3()
+    for (let i = 0; i < posAttr.count; i++) {
+      let wh = 0, wn = 0
+      for (let k = 0; k < 4; k++) {
+        const bi = skinIdx.getComponent(i, k)
+        const w = skinW.getComponent(i, k)
+        if (headIdxs.has(bi)) wh += w
+        else if (bi === neckIdx) wn += w
+      }
+      mask[i] = THREE.MathUtils.clamp(wh * 1.15 + wn * 0.45, 0, 1)
+      if (wh > 0.6) {
+        skinned.getVertexPosition(i, v).applyMatrix4(skinned.matrixWorld)
+        headPts.push(v.clone())
+        hb.expandByPoint(v)
+      }
     }
-    mask[i] = THREE.MathUtils.clamp(wh * 1.15 + wn * 0.45, 0, 1)
-    if (wh > 0.6) {
-      skinned.getVertexPosition(i, v).applyMatrix4(skinned.matrixWorld)
-      headPts.push(v.clone())
-      hb.expandByPoint(v)
-    }
+    // Eyes sit ~58% up the head, on the front surface.
+    const hc = hb.getCenter(new THREE.Vector3())
+    const eyeY = hb.min.y + (hb.max.y - hb.min.y) * 0.58
+    let front = -Infinity
+    for (const p of headPts) if (Math.abs(p.x - hc.x) < 0.03 && Math.abs(p.y - eyeY) < 0.025 && p.z > front) front = p.z
+    if (!Number.isFinite(front)) front = hb.max.z
+    geo.setAttribute('faceMask', new THREE.BufferAttribute(mask, 1))
+    face = { frontPoint: new THREE.Vector3(hc.x, eyeY, front), headSize: hb.max.y - hb.min.y }
+    geo.userData.faceData = face
   }
-  // Eyes sit ~58% up the head, on the front surface.
-  const hc = hb.getCenter(new THREE.Vector3())
-  const eyeY = hb.min.y + (hb.max.y - hb.min.y) * 0.58
-  let front = -Infinity
-  for (const p of headPts) if (Math.abs(p.x - hc.x) < 0.03 && Math.abs(p.y - eyeY) < 0.025 && p.z > front) front = p.z
-  if (!Number.isFinite(front)) front = hb.max.z
-  const headSize = hb.max.y - hb.min.y
-  const frontPoint = new THREE.Vector3(hc.x, eyeY, front)
-  geo.setAttribute('faceMask', new THREE.BufferAttribute(mask, 1))
+  const headSize = face.headSize
+  const frontPoint = face.frontPoint.clone()
 
   // --- Material -------------------------------------------------------------------------
   const src = skinned.material as THREE.MeshStandardMaterial
@@ -251,7 +258,7 @@ export function buildCreatureRig(source: THREE.Object3D): CreatureRig {
   model.scale.multiplyScalar(s)
   root.updateMatrixWorld(true)
 
-  return { root, bones, poseDown, poseUp, eyeMat, glowMat, bodyMat, headBone: head }
+  return { root, bones, poseDown, poseUp, eyeMat, glowMat, eyeGeo, bodyMat, headBone: head }
 }
 
 // Smooth blend between the two authored poses.
@@ -275,7 +282,9 @@ export function Creature() {
     return () => {
       rig.bodyMat.dispose()
       rig.eyeMat.dispose()
+      rig.glowMat.map?.dispose()
       rig.glowMat.dispose()
+      rig.eyeGeo.dispose()
     }
   }, [rig])
 

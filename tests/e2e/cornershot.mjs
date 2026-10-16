@@ -1,0 +1,16 @@
+import { launch, enterGame, sleep, lookAt } from './harness.mjs'
+const out = process.argv[2] || '/tmp'
+const { browser, page } = await launch({ url: 'http://localhost:5173/?debug&maxdt=0.5&skipintro', quality: 'medium', width: 1280, height: 720 })
+await enterGame(page)
+await page.evaluate(() => window.__DLA.creature(0.6, -7.1, true))
+await page.evaluate(() => window.__DLA.teleport(1.4, 6.3))
+await sleep(2500)
+await lookAt(page, -4.5, 8.4, -0.12)
+await sleep(5000)
+await page.screenshot({ path: `${out}/corner_dark.png`, timeout: 240000 })
+await page.evaluate(() => window.__DLA.teleport(-3.0, 3.0))
+await sleep(2500)
+await lookAt(page, -5.8, -2.4, -0.05)
+await sleep(5000)
+await page.screenshot({ path: `${out}/panel_dark.png`, timeout: 240000 })
+await browser.close()

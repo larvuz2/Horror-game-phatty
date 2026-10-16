@@ -74,6 +74,8 @@ export const input = {
     keys.clear()
     pressed.clear()
     mouseDX = mouseDY = 0
+    clickedThisFrame = false
+    mouseDown = false
   },
   // Test/automation hooks.
   simulateDown(code: string) {

@@ -47,8 +47,9 @@ describe('VisibilityDetector', () => {
   })
 
   it('a pillar hides the creature completely', () => {
-    const v = view(-2.3, 2.2, 0)
-    const pts = creatureSamplePoints(new THREE.Vector3(-2.3, 0, -1.6), 0, GAME_CONFIG.creature.height)
+    // Occluders are deliberately shrunk, so only a close pillar fully hides it.
+    const v = view(-2.3, 0.95, 0)
+    const pts = creatureSamplePoints(new THREE.Vector3(-2.3, 0, -3.2), 0, GAME_CONFIG.creature.height)
     expect(isObserved(pts, v, OCCLUDERS, 7, 30)).toBe(false)
     expect(isObserved(pts, v, [], 7, 30)).toBe(true)
   })

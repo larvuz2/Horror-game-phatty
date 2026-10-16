@@ -25,7 +25,7 @@ export function tex(name: string, opts: { srgb?: boolean; repeat?: [number, numb
 }
 
 // Preload every texture used by the room so the loading screen can wait for them.
-export const TEXTURE_SETS = ['floor_concrete', 'wall_block', 'wall_plaster', 'ceiling_concrete', 'metal_painted', 'metal_rust', 'wood_dirty'] as const
+export const TEXTURE_SETS = ['floor_concrete', 'wall_block', 'wall_plaster', 'ceiling_concrete', 'metal_painted', 'metal_rust'] as const
 export const DECAL_TEXTURES = ['decal_oil', 'decal_water', 'decal_grime', 'decal_cracks', 'decal_footprints'] as const
 
 export function preloadTextures(onProgress?: (p: number) => void) {

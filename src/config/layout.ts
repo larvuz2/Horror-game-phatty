@@ -147,9 +147,11 @@ export interface AABB {
   min: [number, number, number]
   max: [number, number, number]
 }
+// Shrunk by 15 cm per side so limbs wider than the sample points can't peek out unnoticed.
+const OCC_SHRINK = 0.15
 export const OCCLUDERS: AABB[] = PILLARS.map((p) => ({
-  min: [p.pos[0] - p.size / 2, 0, p.pos[1] - p.size / 2],
-  max: [p.pos[0] + p.size / 2, ROOM.height, p.pos[1] + p.size / 2],
+  min: [p.pos[0] - p.size / 2 + OCC_SHRINK, 0, p.pos[1] - p.size / 2 + OCC_SHRINK],
+  max: [p.pos[0] + p.size / 2 - OCC_SHRINK, ROOM.height, p.pos[1] + p.size / 2 - OCC_SHRINK],
 }))
 
 // Decals: [texture, position, rotation (euler), size [w, h], opacity, revealOnVictory]

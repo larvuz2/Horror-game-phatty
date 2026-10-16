@@ -67,7 +67,7 @@ export function VictoryScreen({ onRetry, onMenu }: { onRetry: () => void; onMenu
   )
 }
 
-export function PauseMenu({ onResume, onRestart, onMenu, onSettings }: { onResume: () => void; onRestart: () => void; onMenu: () => void; onSettings: () => void }) {
+export function PauseMenu({ note, onResume, onRestart, onMenu, onSettings }: { note: string | null; onResume: () => void; onRestart: () => void; onMenu: () => void; onSettings: () => void }) {
   return (
     <div className="screen pause">
       <h2 className="panel-title">PAUSED</h2>
@@ -85,6 +85,7 @@ export function PauseMenu({ onResume, onRestart, onMenu, onSettings }: { onResum
           QUIT TO MENU
         </button>
       </nav>
+      {note && <p className="pause-note">{note}</p>}
     </div>
   )
 }

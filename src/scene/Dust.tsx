@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
 import { FIXTURES } from '../config/layout'
@@ -88,6 +88,10 @@ export function Dust({ count }: { count: number }) {
     })
     return { geo, mat }
   }, [count])
+  useEffect(() => () => {
+    geo.dispose()
+    mat.dispose()
+  }, [geo, mat])
 
   useFrame((state) => {
     const u = mat.uniforms

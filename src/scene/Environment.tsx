@@ -236,6 +236,7 @@ function Decals() {
       ),
     [],
   )
+  useEffect(() => () => mats.forEach((m) => m.dispose()), [mats])
   useFrame(() => {
     const v = runtime.lights.victory
     DECALS.forEach((d, i) => {
@@ -311,6 +312,7 @@ function ExitSign() {
     t.colorSpace = THREE.SRGBColorSpace
     return t
   }, [])
+  useEffect(() => () => map.dispose(), [map])
   const d = INTERACTABLES.door.pos
   return (
     <mesh position={[d[0], 2.55, -8.96]}>

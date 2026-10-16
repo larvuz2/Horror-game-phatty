@@ -72,6 +72,7 @@ function fresh() {
     cinematic: { t: 0, kind: null as null | 'death' | 'victory' },
     dynamicBodies: [] as { id: string; get: () => THREE.Vector3 }[],
     camera: null as THREE.PerspectiveCamera | null,
+    timers: [] as { at: number; fn: () => void }[], // run-scoped, advance with play time only
   }
 }
 

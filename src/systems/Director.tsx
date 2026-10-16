@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { runtime, resetRuntime, SIM } from './runtime'
 import { useGame } from './GameState'
 import { audio, type Voice } from './AudioManager'
@@ -27,6 +27,8 @@ export function startRun() {
   }
 }
 
+const fwd = new THREE.Vector3()
+const up = new THREE.Vector3()
 const CLOCK = PROPS.find((p) => p.id === 'clock')!.pos
 
 // Per-run orchestration: intro, play timer, ambience and end-of-frame input flush.
@@ -85,6 +87,13 @@ export function Director() {
       }
     } else if (g.phase === 'PLAYING') {
       runtime.time += dt
+      if (runtime.timers.length) {
+        const due = runtime.timers.filter((tm) => tm.at <= runtime.time)
+        if (due.length) {
+          runtime.timers = runtime.timers.filter((tm) => tm.at > runtime.time)
+          due.forEach((tm) => tm.fn())
+        }
+      }
       if (!runtime.cinematic.kind) {
         pl.controlEnabled = true
         pl.lookEnabled = true
@@ -126,6 +135,14 @@ export function Director() {
 
   // Flush edge-triggered input after every system has read it.
   useFrame(() => input.endFrame(), -0.5)
+
+  // The audio listener is the player's head.
+  const { camera } = useThree()
+  useFrame(() => {
+    camera.getWorldDirection(fwd)
+    up.set(0, 1, 0).applyQuaternion(camera.quaternion)
+    audio.setListener(camera.position, fwd, up)
+  }, -1.5)
 
   // Debug / automation hooks.
   useEffect(() => {
