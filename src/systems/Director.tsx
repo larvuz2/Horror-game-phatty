@@ -19,6 +19,7 @@ export function startRun() {
   input.clear()
   const g = useGame.getState()
   g.newRun()
+  fader.setIris(null)
   fader.set(1)
   if (!g.transition('INTRO')) {
     // From PAUSED -> INTRO is allowed; from MAIN_MENU via LOADING too. Fall back to a direct set.
@@ -51,15 +52,27 @@ export function Director() {
       const t = st.intro
       pl.controlEnabled = false
       pl.lookEnabled = false
-      if (t < INTRO.fadeStart) fader.set(1)
-      else fader.set(1 - THREE.MathUtils.smoothstep(t, INTRO.fadeStart, INTRO.fadeEnd))
-      if (!st.introCues.has('amb') && audio.ready) {
+      if (SIM.skipIntro) {
+        fader.setIris(null)
+        fader.set(1 - THREE.MathUtils.smoothstep(t, INTRO.fadeStart, INTRO.fadeEnd))
+      } else {
+        // Waking up: eyes open a little, a slow blink, then fully.
+        const ss = THREE.MathUtils.smoothstep
+        let open = 0
+        if (t > 1.4) open = 0.32 * ss(t, 1.4, 2.5)
+        if (t > 2.5) open = 0.32 - 0.25 * ss(t, 2.5, 2.75)
+        if (t > 2.75) open = 0.07 + 1.25 * ss(t, 2.75, 4.0)
+        fader.setIris(open)
+        fader.set(t < 3.6 ? 1 : 1 - ss(t, 3.6, 4.2))
+      }
+      if (!st.introCues.has('amb') && audio.has('room_tone')) {
         st.introCues.add('amb')
         st.tone = audio.play('room_tone', { bus: 'amb', loop: true, volume: 0.9, fadeIn: 2.5, reverb: 0 })
         st.ambient = audio.play('ambient_bed', { bus: 'music', loop: true, volume: 0.32, fadeIn: 6 })
       }
       if (t >= INTRO.control) {
         if (g.transition('PLAYING')) {
+          fader.setIris(null)
           fader.set(0)
           pl.controlEnabled = true
           pl.lookEnabled = true

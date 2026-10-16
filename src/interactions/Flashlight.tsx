@@ -9,6 +9,7 @@ import { useSettings } from '../systems/SettingsManager'
 import { input } from '../systems/Input'
 import { audio } from '../systems/AudioManager'
 import { usePropScene } from '../scene/Environment'
+import { later } from './InteractionSystem'
 
 const L = GAME_CONFIG.lighting
 const HAND_OFFSET = new THREE.Vector3(0.19, -0.2, -0.36)
@@ -181,19 +182,19 @@ export function Flashlight() {
 
     // Toggle.
     const canUse = g.hasFlashlight && s.pick >= 1 && (g.phase === 'PLAYING') && !runtime.cinematic.kind
-    if (canUse && (input.pressed('KeyF') || input.clicked)) {
+    if (canUse && (input.pressed('KeyF') || (input.clicked && document.pointerLockElement))) {
       if (!fl.powered) {
         audio.play('flashlight_click_empty', { volume: 0.8, bus: 'sfx', reverb: 0.1 })
         if (!s.triedEmpty) {
           s.triedEmpty = true
           g.pushMessage('NO BATTERIES', 'info', 2.6)
-          window.setTimeout(() => {
+          later(g.runId, 2600, () => {
             const gg = useGame.getState()
             if (!gg.hasBatteries) {
               gg.setObjective('FIND_BATTERIES')
               gg.pushMessage('FIND THE BATTERIES', 'objective', 4)
             }
-          }, 2600)
+          })
         } else g.pushMessage('NO BATTERIES', 'info', 1.6)
       } else {
         fl.on = !fl.on

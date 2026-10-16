@@ -52,9 +52,10 @@ export function startDeath(reason: 'unseen' | 'approach') {
 // angle: radians around Y from the creature's forward axis; r: radius; h: camera height.
 const KEYS: { t: number; a: number; r: number; h: number }[] = [
   { t: 1.45, a: THREE.MathUtils.degToRad(203), r: 1.0, h: 2.08 },
-  { t: 3.0, a: THREE.MathUtils.degToRad(196), r: 1.12, h: 2.02 },
-  { t: 5.0, a: THREE.MathUtils.degToRad(112), r: 1.75, h: 1.78 },
-  { t: 7.0, a: THREE.MathUtils.degToRad(16), r: 1.95, h: 1.55 },
+  { t: 3.0, a: THREE.MathUtils.degToRad(198), r: 1.15, h: 2.05 },
+  { t: 4.6, a: THREE.MathUtils.degToRad(186), r: 1.32, h: 2.0 }, // the head rises above the shoulders
+  { t: 6.0, a: THREE.MathUtils.degToRad(100), r: 1.8, h: 1.78 },
+  { t: 7.3, a: THREE.MathUtils.degToRad(16), r: 1.95, h: 1.56 },
   { t: 9.0, a: THREE.MathUtils.degToRad(6), r: 1.3, h: 1.62 },
   { t: 12.0, a: THREE.MathUtils.degToRad(2), r: 0.78, h: 1.78 },
   { t: 15.0, a: 0, r: 0.6, h: 1.86 },
@@ -149,7 +150,7 @@ export function DeathCinematic() {
 
     // Lighting: a rim from behind first, then a cold top key as the camera comes around.
     lr.cinematicRim = smooth(range(t, T.stageAt, T.stageAt + 1.2)) * (1 - smooth(range(t, 9.5, 12)))
-    lr.cinematicKey = smooth(range(t, 3.5, 6.5)) * (1 - smooth(range(t, 9.0, 12.0)) * 0.95)
+    lr.cinematicKey = smooth(range(t, 4.5, 7.0)) * (1 - smooth(range(t, 9.0, 12.0)) * 0.95)
 
     // Camera path.
     const k = sampleKeys(t)

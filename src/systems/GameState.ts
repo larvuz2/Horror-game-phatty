@@ -39,6 +39,7 @@ interface GameStore {
   objective: Objective
   runId: number
   assetsReady: boolean
+  audioReady: boolean
   hasFlashlight: boolean
   hasBatteries: boolean
   flashlightOn: boolean
@@ -63,6 +64,7 @@ export const useGame = create<GameStore>((set, get) => ({
   objective: 'FIND_FLASHLIGHT',
   runId: 0,
   assetsReady: false,
+  audioReady: false,
   hasFlashlight: false,
   hasBatteries: false,
   flashlightOn: false,

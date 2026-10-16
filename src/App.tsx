@@ -78,11 +78,17 @@ export default function App() {
       const g = useGame.getState()
       if ((e.target as HTMLElement)?.tagName === 'CANVAS' && g.phase === 'PLAYING' && !document.pointerLockElement) lockPointer()
     }
+    const onVisibility = () => {
+      const g = useGame.getState()
+      if (document.hidden && (g.phase === 'PLAYING' || g.phase === 'INTRO')) g.transition('PAUSED')
+    }
     document.addEventListener('pointerlockchange', onChange)
+    document.addEventListener('visibilitychange', onVisibility)
     window.addEventListener('keydown', onKey)
     window.addEventListener('mousedown', onCanvasClick)
     return () => {
       document.removeEventListener('pointerlockchange', onChange)
+      document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('mousedown', onCanvasClick)
     }
@@ -112,12 +118,14 @@ export default function App() {
     audio.init()
     setUnlocked(true)
     await audio.decodeAll()
+    useGame.getState().set({ audioReady: true })
     audio.play('ui_select', { bus: 'ui', volume: 0.4 })
   }, [])
 
   const begin = useCallback(() => {
     audio.init()
     void audio.decodeAll()
+    audio.stopAll(0.8)
     audio.play('ui_select', { bus: 'ui', volume: 0.55 })
     lockPointer()
     menuMusic.current?.stop(1.2)

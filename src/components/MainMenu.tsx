@@ -9,7 +9,7 @@ const hover = () => audio.play('ui_hover', { bus: 'ui', volume: 0.35 })
 export function MainMenu({ onStart, loading }: { onStart: () => void; loading: number }) {
   const panel = useGame((s) => s.menuPanel)
   const set = useGame((s) => s.set)
-  const ready = useGame((s) => s.assetsReady)
+  const ready = useGame((s) => s.assetsReady && s.audioReady)
   const go = (p: 'main' | 'settings' | 'credits') => {
     audio.play('ui_select', { bus: 'ui', volume: 0.5 })
     set({ menuPanel: p })

@@ -76,9 +76,9 @@ export function InteractionSystem() {
           runtime.flashlight.held = true
           audio.play('flashlight_pickup', { volume: 0.8, reverb: 0.15 })
           if (g.hasBatteries) {
-            powerFlashlight()
+            powerFlashlight(g.runId)
           } else {
-            window.setTimeout(() => useGame.getState().pushMessage('F — FLASHLIGHT', 'hint', 3.5), 700)
+            later(g.runId, 700, () => useGame.getState().pushMessage('F — FLASHLIGHT', 'hint', 3.5))
           }
         }
         break
@@ -88,10 +88,8 @@ export function InteractionSystem() {
           g.set({ hasBatteries: true })
           audio.play('battery_pickup', { volume: 0.8, reverb: 0.15 })
           if (g.hasFlashlight) {
-            window.setTimeout(() => {
-              audio.play('battery_insert', { volume: 0.75, reverb: 0.15 })
-            }, 350)
-            window.setTimeout(() => powerFlashlight(), 2400)
+            later(g.runId, 350, () => audio.play('battery_insert', { volume: 0.75, reverb: 0.15 }))
+            later(g.runId, 2400, () => powerFlashlight(g.runId))
           } else {
             g.pushMessage('BATTERIES', 'info', 2)
           }
@@ -139,15 +137,23 @@ export function InteractionSystem() {
   return null
 }
 
-function powerFlashlight() {
+// setTimeout that is dropped if the run changed (retry/restart) or the game is no longer being played.
+export function later(runId: number, ms: number, fn: () => void) {
+  window.setTimeout(() => {
+    const g = useGame.getState()
+    if (g.runId === runId && (g.phase === 'PLAYING' || g.phase === 'PAUSED')) fn()
+  }, ms)
+}
+
+function powerFlashlight(runId: number) {
   const g = useGame.getState()
-  if (g.phase !== 'PLAYING') return
+  if (g.phase !== 'PLAYING' || g.runId !== runId) return
   runtime.flashlight.powered = true
   runtime.flashlight.on = true
   g.set({ flashlightOn: true })
   audio.play('flashlight_on', { volume: 0.8, reverb: 0.1 })
   if (g.objective !== 'COMPLETED') {
     g.setObjective('RESTORE_POWER')
-    window.setTimeout(() => useGame.getState().pushMessage('RESTORE THE LIGHTS', 'objective', 4.5), 900)
+    later(runId, 900, () => useGame.getState().pushMessage('RESTORE THE LIGHTS', 'objective', 4.5))
   }
 }
