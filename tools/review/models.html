@@ -1,0 +1,45 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>body{margin:0;background:#333}canvas{display:block}</style></head>
+<body><script type="module">
+import * as THREE from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
+const params = new URLSearchParams(location.search)
+const names = (params.get('names') || '').split(',').filter(Boolean)
+const dir = params.get('dir') || '/models/props/'
+const cols = Math.min(names.length, +(params.get('cols') || 4))
+const view = params.get('view') || 'front'
+const cell = 300
+const rows = Math.ceil(names.length / cols)
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true })
+renderer.setSize(cols * cell, rows * cell)
+renderer.setScissorTest(true)
+document.body.appendChild(renderer.domElement)
+const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder)
+const scenes = []
+for (const n of names) {
+  const gltf = await loader.loadAsync(dir + (n.endsWith('.glb') ? n : `prop_${n}.glb`))
+  const s = new THREE.Scene(); s.background = new THREE.Color(0x2a2a2a)
+  s.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.6))
+  const d = new THREE.DirectionalLight(0xffffff, 2); d.position.set(2, 4, 3); s.add(d)
+  s.add(gltf.scene); gltf.scene.updateMatrixWorld(true)
+  const box = new THREE.Box3().setFromObject(gltf.scene)
+  const size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3())
+  const r = size.length() * 0.62
+  const cam = new THREE.PerspectiveCamera(35, 1, 0.01, 100)
+  if (view === 'front') cam.position.set(c.x + r * 0.5, c.y + r * 0.6, c.z + r * 2.4)
+  else if (view === 'top') cam.position.set(c.x, c.y + r * 2, c.z + 0.001)
+  else if (view === 'side') cam.position.set(c.x + r * 1.7, c.y + r * 0.2, c.z)
+  cam.lookAt(c)
+  // axes helper: red = +x, green = +y, blue = +z
+  const ax = new THREE.AxesHelper(Math.max(size.x, size.y, size.z) * 0.6); s.add(ax)
+  scenes.push({ s, cam, n, size })
+}
+scenes.forEach(({ s, cam }, i) => {
+  const x = (i % cols) * cell, y = (rows - 1 - Math.floor(i / cols)) * cell
+  renderer.setViewport(x, y, cell, cell); renderer.setScissor(x, y, cell, cell)
+  renderer.render(s, cam)
+})
+window.__labels = scenes.map(({ n, size }) => `${n} ${size.x.toFixed(2)}x${size.y.toFixed(2)}x${size.z.toFixed(2)}`)
+window.__done = true
+</script></body></html>

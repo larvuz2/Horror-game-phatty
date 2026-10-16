@@ -1,0 +1,176 @@
+{
+ "menu_theme": {
+  "loop": true,
+  "loopStart": 0.12,
+  "loopEnd": 108.12
+ },
+ "ambient_bed": {
+  "loop": true,
+  "loopStart": 0.12,
+  "loopEnd": 110.12
+ },
+ "tension_layer": {
+  "loop": true,
+  "loopStart": 0.12,
+  "loopEnd": 45.12
+ },
+ "death_cinematic": {
+  "loop": false
+ },
+ "victory": {
+  "loop": false
+ },
+ "attack_sting": {
+  "loop": false
+ },
+ "battery_insert": {
+  "loop": false
+ },
+ "battery_pickup": {
+  "loop": false
+ },
+ "bottle_hit": {
+  "loop": false
+ },
+ "breaker_lever": {
+  "loop": false
+ },
+ "breaker_strain": {
+  "loop": false
+ },
+ "bucket_hit": {
+  "loop": false
+ },
+ "can_roll": {
+  "loop": false
+ },
+ "cardboard_shift": {
+  "loop": false
+ },
+ "chair_scrape": {
+  "loop": false
+ },
+ "clock_tick": {
+  "loop": false
+ },
+ "cloth_rustle": {
+  "loop": false
+ },
+ "creak_1": {
+  "loop": false
+ },
+ "creak_2": {
+  "loop": false
+ },
+ "creature_breath": {
+  "loop": true,
+  "loopStart": 0.12,
+  "loopEnd": 7.12
+ },
+ "creature_move": {
+  "loop": false
+ },
+ "distant_metal": {
+  "loop": false
+ },
+ "door_locked": {
+  "loop": false
+ },
+ "drip": {
+  "loop": false
+ },
+ "ear_ring": {
+  "loop": false
+ },
+ "flashlight_click_empty": {
+  "loop": false
+ },
+ "flashlight_on": {
+  "loop": false
+ },
+ "flashlight_pickup": {
+  "loop": false
+ },
+ "fluorescent_flicker": {
+  "loop": false
+ },
+ "fluorescent_hum": {
+  "loop": true,
+  "loopStart": 0.12,
+  "loopEnd": 8.819999999999999
+ },
+ "heartbeat": {
+  "loop": true,
+  "loopStart": 0.12,
+  "loopEnd": 5.5200000000000005
+ },
+ "lights_out": {
+  "loop": false
+ },
+ "metal_chair_scrape": {
+  "loop": false
+ },
+ "metal_clang": {
+  "loop": false
+ },
+ "metal_knock": {
+  "loop": false
+ },
+ "panel_buzz": {
+  "loop": true,
+  "loopStart": 0.12,
+  "loopEnd": 6.82
+ },
+ "panel_open": {
+  "loop": false
+ },
+ "power_on": {
+  "loop": false
+ },
+ "pressure_tone": {
+  "loop": true,
+  "loopStart": 0.12,
+  "loopEnd": 7.62
+ },
+ "room_tone": {
+  "loop": true,
+  "loopStart": 0.12,
+  "loopEnd": 12.62
+ },
+ "sub_drop": {
+  "loop": false
+ },
+ "ui_hover": {
+  "loop": false
+ },
+ "ui_select": {
+  "loop": false
+ },
+ "whispers": {
+  "loop": false
+ },
+ "wood_knock": {
+  "loop": false
+ },
+ "step_1": {
+  "loop": false
+ },
+ "step_2": {
+  "loop": false
+ },
+ "step_3": {
+  "loop": false
+ },
+ "step_4": {
+  "loop": false
+ },
+ "step_5": {
+  "loop": false
+ },
+ "step_6": {
+  "loop": false
+ },
+ "step_7": {
+  "loop": false
+ }
+}

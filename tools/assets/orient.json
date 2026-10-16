@@ -1,0 +1,80 @@
+{
+ "chair_wood": {
+  "rotY": -90
+ },
+ "chair_metal": {
+  "rotY": -90
+ },
+ "table_small": {
+  "rotY": -90
+ },
+ "desk_metal": {
+  "rotY": -90
+ },
+ "shelf_tall": {
+  "rotY": -90
+ },
+ "cabinet": {
+  "rotY": -90
+ },
+ "box_cardboard": {
+  "rotY": -90
+ },
+ "box_open": {
+  "rotY": -90
+ },
+ "bucket": {
+  "rotY": -90
+ },
+ "paint_can": {
+  "rotY": -90
+ },
+ "bottle": {
+  "rotY": -90
+ },
+ "pallet": {
+  "rotY": -90
+ },
+ "barrel": {
+  "rotY": -90
+ },
+ "trash_bin": {
+  "rotY": -90
+ },
+ "wall_clock": {
+  "rotY": -90
+ },
+ "fluorescent": {
+  "rotY": -90
+ },
+ "electrical_panel": {
+  "rotY": -90
+ },
+ "batteries": {
+  "rotY": -90
+ },
+ "toolbox": {
+  "rotY": -90
+ },
+ "rag": {
+  "rotY": -90
+ },
+ "warning_sign": {
+  "rotY": -90
+ },
+ "fan": {
+  "rotY": -90
+ },
+ "door": {
+  "rotY": -90
+ },
+ "pipe": {
+  "rotY": -90
+ },
+ "cable_spool": {
+  "rotY": -90
+ },
+ "gas_cylinder": {
+  "rotY": -90
+ }
+}
