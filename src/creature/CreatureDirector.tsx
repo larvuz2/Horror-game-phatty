@@ -23,6 +23,7 @@ export function CreatureDirector() {
   const view = useRef<ViewInfo | null>(null)
   const voices = useRef<{ breath?: Voice | null; tension?: Voice | null; pressure?: Voice | null; heart?: Voice | null }>({})
   const dyn = useMemo(() => [] as THREE.Vector3[], [])
+  const reveal = useRef({ first: false, at: -100, lastMoves: 0 })
 
   useEffect(() => {
     runtime.creature.pos.copy(brain.pos)
@@ -63,6 +64,20 @@ export function CreatureDirector() {
         aggressive: g.hasBatteries,
         dynamicPositions: dyn,
       })
+      // Re-discovery: the first time you look back and it has moved, a low boom (restrained afterwards).
+      if (brain.observed && !c.observed && brain.moves > reveal.current.lastMoves) {
+        const d = brain.distanceTo(runtime.player.pos)
+        const now = runtime.time
+        if (!reveal.current.first) {
+          reveal.current.first = true
+          audio.play('sub_drop', { volume: 0.6, bus: 'sfx', reverb: 0.2 })
+          reveal.current.at = now
+        } else if (d < 5.5 && now - reveal.current.at > 7) {
+          audio.play('sub_drop', { volume: 0.32, rate: 1.25, bus: 'sfx', reverb: 0.2 })
+          reveal.current.at = now
+        }
+        reveal.current.lastMoves = brain.moves
+      }
       c.pos.copy(brain.pos)
       c.yaw = brain.yaw
       c.observed = brain.observed

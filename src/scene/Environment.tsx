@@ -226,6 +226,7 @@ function Decals() {
             map: tex(d.tex, { srgb: true }),
             transparent: true,
             opacity: d.victoryOnly ? 0 : d.opacity,
+            color: d.tex === 'decal_footprints' ? new THREE.Color(0.35, 0.33, 0.31) : new THREE.Color(1, 1, 1),
             depthWrite: false,
             polygonOffset: true,
             polygonOffsetFactor: -4,

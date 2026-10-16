@@ -1,0 +1,18 @@
+import { launch, enterGame, sleep, lookAt } from './harness.mjs'
+const out = process.argv[2] || '/tmp'
+const { browser, page, errors } = await launch({ url: 'http://localhost:5173/?debug&maxdt=0.5&skipintro', quality: process.env.Q || 'medium', width: 1280, height: 720 })
+await enterGame(page)
+await page.evaluate(() => { window.__DLA.give('all'); window.__DLA.creature(0.6, -7.1, true) })
+await page.evaluate(() => window.__DLA.teleport(-4.6, 0.5))
+await sleep(3000)
+await page.evaluate(() => window.__DLA.victory())
+await lookAt(page, 2, -3, -0.12)
+await page.waitForFunction(() => window.__DLA.runtime().cinematic.t > 1.2, null, { timeout: 120000 })
+await page.screenshot({ path: `${out}/v_strobe.png`, timeout: 240000 })
+await page.waitForFunction(() => window.__DLA.runtime().cinematic.t > 4.5, null, { timeout: 200000 })
+await page.screenshot({ path: `${out}/v_lit.png`, timeout: 240000 })
+await lookAt(page, 0.3, 5, -0.35)
+await sleep(4000)
+await page.screenshot({ path: `${out}/v_lit2.png`, timeout: 240000 })
+console.log(errors.join('\n'))
+await browser.close()

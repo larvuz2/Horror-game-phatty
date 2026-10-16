@@ -69,7 +69,10 @@ export default function App() {
     const onKey = (e: KeyboardEvent) => {
       if (e.code !== 'Escape') return
       const g = useGame.getState()
-      if (!document.pointerLockElement && (g.phase === 'PLAYING' || g.phase === 'INTRO')) g.transition('PAUSED')
+      if (g.phase !== 'PLAYING' && g.phase !== 'INTRO') return
+      // Browsers usually release the lock themselves on Esc (which fires pointerlockchange -> pause).
+      if (document.pointerLockElement) document.exitPointerLock()
+      else g.transition('PAUSED')
     }
     const onCanvasClick = (e: MouseEvent) => {
       const g = useGame.getState()

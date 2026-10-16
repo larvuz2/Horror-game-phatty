@@ -114,6 +114,7 @@ export function Flashlight() {
     nextFlicker: 4,
     askedTimer: -1,
     triedEmpty: false,
+    noise: 0,
   })
   const beamLen = L.flashlightRange * 0.85
   const beamGeo = useMemo(() => {
@@ -218,7 +219,19 @@ export function Flashlight() {
     }
     s.flick = Math.max(0, s.flick - dt)
     const dip = s.flick > 0 ? 0.55 + 0.45 * Math.abs(Math.sin(s.flick * 90)) : 1
-    fl.flicker = dip * (0.97 + Math.sin(state.clock.elapsedTime * 3.1) * 0.015)
+    // Electrical interference: the light stutters when aimed at it, or when it is right behind you.
+    const c = runtime.creature
+    let interference = 0
+    if (c.active && c.visible && c.state !== 'GONE') {
+      const toC = c.headPos.clone().sub(camera.position)
+      const dist = toC.length()
+      const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion)
+      const inBeam = toC.normalize().dot(fwd) > Math.cos(L.flashlightAngle * 1.2) ? 1 : 0
+      interference = Math.max(inBeam * THREE.MathUtils.clamp((7 - dist) / 5, 0, 1), !c.observed ? THREE.MathUtils.clamp((3.2 - dist) / 2, 0, 1) : 0)
+    }
+    s.noise += dt * (18 + interference * 40)
+    const stutter = interference > 0 ? 1 - interference * 0.75 * Math.max(0, Math.sin(s.noise) * Math.sin(s.noise * 2.7 + 1.3)) : 1
+    fl.flicker = dip * stutter * (0.97 + Math.sin(state.clock.elapsedTime * 3.1) * 0.015)
     const on = fl.on && g.hasFlashlight && runtime.cinematic.kind !== 'death'
     const intensity = on ? L.flashlightIntensity * fl.flicker * (1 - runtime.lights.victory * 0.7) : 0
 
