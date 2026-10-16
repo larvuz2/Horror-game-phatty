@@ -20,7 +20,7 @@ export function MainMenu({ onStart, loading }: { onStart: () => void; loading: n
         <>
           <div className="menu-logo">
             <Logo />
-            <p className="tagline">It only moves when you don’t look.</p>
+            <p className="tagline">By Phatty Acid Generative Studios</p>
           </div>
           <nav className="menu-items">
             <button className="menu-item" onClick={onStart} onMouseEnter={hover} disabled={!ready}>

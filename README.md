@@ -1,6 +1,6 @@
 # DON'T LOOK AWAY
 
-*It only moves when you don't look.*
+*By Phatty Acid Generative Studios*
 
 A short (1–3 minute), cinematic first-person horror game for desktop browsers.
 You wake up in a dark industrial storage room. At the far end stands a tall figure,

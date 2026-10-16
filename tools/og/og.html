@@ -1,0 +1,19 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+@font-face { font-family: 'Oswald'; src: url('/fonts/oswald.woff2') format('woff2'); font-weight: 200 700; }
+@font-face { font-family: 'Plex Mono'; src: url('/fonts/plexmono-400.woff2') format('woff2'); }
+html, body { margin: 0; width: 1200px; height: 630px; background: #000; overflow: hidden; }
+.bg { position: absolute; inset: 0; background: url('/tools/og/bg.jpg') center 42% / cover; filter: brightness(0.95) contrast(1.05); }
+.shade { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 85% at 50% 45%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.85) 100%), linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0) 30%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.9)); }
+.wrap { position: absolute; left: 0; right: 0; bottom: 70px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+h1 { margin: 0; font-family: 'Oswald'; font-weight: 300; font-size: 96px; letter-spacing: 0.06em; color: #dde2e1; display: flex; gap: 0.38em; text-shadow: 0 0 40px rgba(0,0,0,0.9); }
+h1 span.away { display: inline-block; transform: translate(0.03em, 0.05em) rotate(9deg); color: #aeb4b3; }
+p { margin: 0; font-family: 'Plex Mono'; font-size: 20px; letter-spacing: 0.42em; color: #9aa1a0; text-transform: uppercase; text-shadow: 0 0 12px #000; }
+</style></head><body>
+<div class="bg"></div><div class="shade"></div>
+<div class="wrap">
+  <h1><span>DON’T</span><span>LO<span class="away">O</span>K</span><span>AWAY</span></h1>
+  <p>By Phatty Acid Generative Studios</p>
+</div>
+<script>document.fonts.ready.then(() => (window.__done = true))</script>
+</body></html>

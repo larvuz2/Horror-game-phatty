@@ -1,6 +1,7 @@
 import { audio } from '../systems/AudioManager'
 
 const CREDITS: [string, string][] = [
+  ['A PRODUCTION OF', 'Phatty Acid Generative Studios'],
   ['DESIGN, CODE & DIRECTION', 'Claude · Anthropic'],
   ['3D PROPS', 'Tripo P2 (AI generated, cleaned with glTF-Transform)'],
   ['CREATURE', 'Meshy 7.1 · auto-rigged, posed procedurally'],
