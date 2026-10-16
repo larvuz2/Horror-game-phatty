@@ -71,6 +71,19 @@ async function victory() {
   s = await state(page)
   check('batteries picked and flashlight on', s.hasBatteries && s.flashOn, JSON.stringify({ b: s.hasBatteries, on: s.flashOn }))
   check('objective RESTORE_POWER', s.objective === 'RESTORE_POWER', s.objective)
+  // Mouse clicks must never change any lighting (flashlight or room).
+  const before = await page.evaluate(() => { const r = window.__DLA.runtime(); return { on: r.flashlight.on, master: r.lights.master, scripted: r.lights.scripted } })
+  for (let i = 0; i < 4; i++) {
+    await page.mouse.click(320, 180)
+    await sleep(350)
+  }
+  const afterClicks = await page.evaluate(() => { const r = window.__DLA.runtime(); return { on: r.flashlight.on, master: r.lights.master, scripted: r.lights.scripted } })
+  check('mouse clicks do not toggle any lights', JSON.stringify(before) === JSON.stringify(afterClicks) && afterClicks.on, JSON.stringify({ before, afterClicks }))
+  await hold(page, 'KeyF', 200)
+  await sleep(400)
+  check('F still toggles the flashlight', (await state(page)).flashOn === false)
+  await hold(page, 'KeyF', 200)
+  await sleep(400)
   if (out) await page.screenshot({ path: `${out}/pt_batteries.png` })
   await page.evaluate(() => window.__DLA.teleport(-5.0, -2.4))
   await sleep(800)

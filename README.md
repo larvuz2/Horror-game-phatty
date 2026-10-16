@@ -30,7 +30,7 @@ Best with headphones, in a dark room. Works with mouse and keyboard, or on phone
 | Mouse | Look |
 | Arrow keys | Look around (left/right turn, up/down tilt) |
 | `E` | Interact (hold on the breaker) |
-| `F` / left click | Toggle the flashlight |
+| `F` | Toggle the flashlight (it switches on by itself once it has batteries) |
 | `Esc` | Pause / release the mouse |
 
 ## Deploy (Netlify)

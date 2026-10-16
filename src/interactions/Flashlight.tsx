@@ -188,7 +188,8 @@ export function Flashlight() {
 
     // Toggle.
     const canUse = g.hasFlashlight && s.pick >= 1 && (g.phase === 'PLAYING') && !runtime.cinematic.kind
-    if (canUse && (input.pressed('KeyF') || (input.clicked && document.pointerLockElement))) {
+    // Only F (or the mobile button) toggles it. Mouse clicks never change any lighting.
+    if (canUse && input.pressed('KeyF')) {
       if (!fl.powered) {
         audio.play('flashlight_click_empty', { volume: 0.8, bus: 'sfx', reverb: 0.1 })
         if (!s.triedEmpty) {
@@ -254,7 +255,7 @@ export function Flashlight() {
     }
     if (beam.current) {
       beam.current.visible = on && q.beam
-      beamMat.uniforms.uIntensity.value = 0.05 * fl.flicker * (1 - runtime.lights.victory)
+      beamMat.uniforms.uIntensity.value = 0.03 * fl.flicker * (1 - runtime.lights.victory)
       beamMat.uniforms.uTime.value = state.clock.elapsedTime
     }
   }, -4)
@@ -277,7 +278,7 @@ export function Flashlight() {
       <spotLight
         ref={lightRef}
         angle={L.flashlightAngle}
-        penumbra={0.6}
+        penumbra={0.5}
         distance={L.flashlightRange}
         decay={L.flashlightDecay}
         intensity={0}
