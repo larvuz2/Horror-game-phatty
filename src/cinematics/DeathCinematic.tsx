@@ -6,6 +6,7 @@ import { GAME_CONFIG } from '../config/gameConfig'
 import { runtime, SIM } from '../systems/runtime'
 import { useGame } from '../systems/GameState'
 import { audio } from '../systems/AudioManager'
+import { fader } from '../systems/fader'
 
 const T = GAME_CONFIG.cinematic
 
@@ -84,6 +85,7 @@ export function DeathCinematic() {
     lookQuat: new THREE.Quaternion(),
     staged: false,
     blackout: false,
+    unblinked: false,
     cues: new Set<string>(),
     look: new THREE.Vector3(),
     done: false,
@@ -115,6 +117,14 @@ export function DeathCinematic() {
       st.lookQuat.setFromRotationMatrix(m4.current)
     }
 
+    // A quick blink of black hides the cut to the staged shot. The room's own lights are never
+    // touched: the fluorescent tubes keep flickering exactly as they did during play.
+    if (t < 1.95) fader.set(t < 0.8 ? 0 : t < T.blackoutAt ? smooth((t - 0.8) / (T.blackoutAt - 0.8)) : t < T.stageAt ? 1 : 1 - smooth((t - T.stageAt) / 0.5))
+    else if (!st.unblinked) {
+      st.unblinked = true
+      fader.set(0)
+    }
+
     // 0 - 1: control loss, the view is dragged toward it; sound muffles.
     if (t < T.blackoutAt) {
       const u = smooth(t / T.blackoutAt)
@@ -125,13 +135,9 @@ export function DeathCinematic() {
       return
     }
 
-    // Blackout: every light dies.
+    // The cut.
     cue('blackout', T.blackoutAt, () => {
-      lr.scripted = true
-      lr.master = 0
-      for (const k of Object.keys(lr.fixtures)) lr.fixtures[k] = 0
       fx.shake = 0
-      audio.play('lights_out', { volume: 0.9, bus: 'sfx', reverb: 0.4 })
       audio.play('sub_drop', { volume: 0.9, bus: 'sfx', reverb: 0 })
       audio.setMuffle(0.35, 0.8)
     })
@@ -196,7 +202,8 @@ export function DeathCinematic() {
     fx.dofFocus = camera.position.distanceTo(face)
     fx.shake = t > 9.5 && t < 12.5 ? 0.15 : 0
     c.bodyFade = 1 - smooth(range(t, T.fadeStart, 13.6))
-    fx.fog = 1 + smooth(range(t, T.fadeStart, 14)) * 5
+    // The world sinks into black fog; only the eyes (fog-immune) remain.
+    fx.fog = 1 + smooth(range(t, T.fadeStart, 14)) * 22
     cue('silence', 12.6, () => audio.setMuffle(0, 0.1))
 
     if (t >= T.titleAt && !st.done) {

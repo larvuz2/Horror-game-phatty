@@ -63,6 +63,7 @@ export class CreatureBrain {
   moves = 0
   nextDelay: number = C.firstMoveDelay
   pendingAttack = -1 // time when the attack fires
+  frozen = false // debug/tests only
   attacked = false
   proximity = 0 // 0..1 within the observed proximity zone
   readonly obstacles: AABB[]
@@ -135,6 +136,7 @@ export class CreatureBrain {
       this.nextDelay = C.firstMoveDelay
       return ev
     }
+    if (this.frozen) return ev
     this.unobservedTime += ctx.dt
     if (this.unobservedTime < this.nextDelay || ctx.time - this.lastMoveTime < C.minMoveInterval) return ev
 

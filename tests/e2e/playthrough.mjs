@@ -120,10 +120,13 @@ async function approach() {
   check('walking into it triggers death', ok, JSON.stringify(s))
   check('creature never moved while watched', s.moves === 0, `moves=${s.moves}`)
   const shots = [2, 5, 8, 10.5, 12.5, 14]
+  const lightLog = []
   for (const t of shots) {
     await page.waitForFunction((t) => window.__DLA.runtime().cinematic.t >= t, t, { timeout: 60000 }).catch(() => {})
+    lightLog.push(await page.evaluate(() => { const l = window.__DLA.runtime().lights; return { master: l.master, scripted: l.scripted, F1: l.fixtures.F1 } }))
     if (out) await page.screenshot({ path: `${out}/pt_death_${t}.png` })
   }
+  check('room lights untouched during the death sequence', lightLog.every((l) => l.master === 1 && !l.scripted) && new Set(lightLog.map((l) => l.F1.toFixed(3))).size > 1, JSON.stringify(lightLog.map((l) => l.F1.toFixed(2))))
   const ds = await waitPhase(page, 'DEATH_SCREEN', 60000)
   check('death screen appears', ds)
   await sleep(2500)

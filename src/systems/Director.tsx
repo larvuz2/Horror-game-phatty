@@ -168,12 +168,11 @@ export function Director() {
         }
       },
       creature: (x: number, z: number, freeze = true) => {
-        const b = (window as unknown as { __brain?: { pos: THREE.Vector3; faceTarget: (v: THREE.Vector3) => void; nextDelay: number } }).__brain
+        const b = (window as unknown as { __brain?: { pos: THREE.Vector3; faceTarget: (v: THREE.Vector3) => void; frozen: boolean } }).__brain
         if (!b) return
         b.pos.set(x, 0, z)
         b.faceTarget(runtime.player.pos)
-        if (freeze) b.nextDelay = 1e9
-        else b.nextDelay = 1.5
+        b.frozen = freeze
       },
       death: () => startDeath('approach'),
       victory: () => startVictory(),

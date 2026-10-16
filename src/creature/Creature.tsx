@@ -182,8 +182,8 @@ export function buildCreatureRig(source: THREE.Object3D): CreatureRig {
   skinned.frustumCulled = false
 
   // --- Eyes (children of the head bone) ------------------------------------------------
-  const eyeMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 0.09, 0.09), transparent: true, opacity: 0, toneMapped: false, depthWrite: false })
-  const glowMat = new THREE.SpriteMaterial({ map: glowTexture(), color: '#ff1717', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false })
+  const eyeMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 0.09, 0.09), transparent: true, opacity: 0, toneMapped: false, depthWrite: false, fog: false })
+  const glowMat = new THREE.SpriteMaterial({ map: glowTexture(), color: '#ff1717', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, fog: false })
   const eyeGeo = new THREE.SphereGeometry(0.0105, 12, 8)
   for (const side of [-1, 1]) {
     const wp = frontPoint.clone().add(new THREE.Vector3(side * headSize * 0.13, 0, -0.012))
