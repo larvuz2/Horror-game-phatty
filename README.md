@@ -7,6 +7,11 @@ You wake up in a dark industrial storage room. At the far end stands a tall figu
 head hanging, perfectly still. Find the flashlight, find the batteries, restore the power.
 Every time it leaves your field of view, it gets closer.
 
+| | |
+| --- | --- |
+| ![The room](docs/shot-start.jpg) | ![The figure](docs/shot-figure.jpg) |
+| ![Death cinematic](docs/shot-cinematic.jpg) | ![Lights restored](docs/shot-lights.jpg) |
+
 ## Play
 
 ```bash
