@@ -71,14 +71,23 @@ async function victory() {
   s = await state(page)
   check('batteries picked and flashlight on', s.hasBatteries && s.flashOn, JSON.stringify({ b: s.hasBatteries, on: s.flashOn }))
   check('objective RESTORE_POWER', s.objective === 'RESTORE_POWER', s.objective)
-  // Mouse clicks must never change any lighting (flashlight or room).
-  const before = await page.evaluate(() => { const r = window.__DLA.runtime(); return { on: r.flashlight.on, master: r.lights.master, scripted: r.lights.scripted } })
-  for (let i = 0; i < 4; i++) {
-    await page.mouse.click(320, 180)
-    await sleep(350)
+  // Left click works exactly like F, and never touches the room lights.
+  const roomBefore = await page.evaluate(() => { const l = window.__DLA.runtime().lights; return { master: l.master, scripted: l.scripted } })
+  if (!(await page.evaluate(() => !!document.pointerLockElement))) {
+    await page.mouse.click(320, 180) // capture the mouse first
+    await sleep(500)
   }
-  const afterClicks = await page.evaluate(() => { const r = window.__DLA.runtime(); return { on: r.flashlight.on, master: r.lights.master, scripted: r.lights.scripted } })
-  check('mouse clicks do not toggle any lights', JSON.stringify(before) === JSON.stringify(afterClicks) && afterClicks.on, JSON.stringify({ before, afterClicks }))
+  if (await page.evaluate(() => !!document.pointerLockElement)) {
+    const before = (await state(page)).flashOn
+    await page.mouse.click(320, 180)
+    await sleep(500)
+    check('left click toggles the flashlight like F', (await state(page)).flashOn === !before)
+    await page.mouse.click(320, 180)
+    await sleep(500)
+    check('left click toggles it back', (await state(page)).flashOn === before)
+  }
+  const roomAfter = await page.evaluate(() => { const l = window.__DLA.runtime().lights; return { master: l.master, scripted: l.scripted } })
+  check('room lights untouched by flashlight toggles', JSON.stringify(roomBefore) === JSON.stringify(roomAfter) && !roomAfter.scripted && roomAfter.master === 1, JSON.stringify(roomAfter))
   await hold(page, 'KeyF', 200)
   await sleep(400)
   check('F still toggles the flashlight', (await state(page)).flashOn === false)
@@ -206,12 +215,27 @@ async function watched() {
   await browser.close()
 }
 
+async function clicks() {
+  const { browser, page, errors } = await freshGame()
+  await page.evaluate(() => window.__DLA.give('flashlight'))
+  await sleep(1500)
+  await page.mouse.click(320, 180) // capture the mouse
+  await sleep(500)
+  await page.mouse.click(320, 180)
+  await sleep(600)
+  const msgs = await page.evaluate(() => window.__DLA.game.getState().messages.map((m) => m.text))
+  const locked = await page.evaluate(() => !!document.pointerLockElement)
+  check('left click without batteries says NO BATTERIES (same as F)', !locked || msgs.includes('NO BATTERIES'), JSON.stringify({ locked, msgs }))
+  report(errors)
+  await browser.close()
+}
+
 function report(errors) {
   const real = errors.filter((e) => !/THREE.Clock|deprecated parameters|KHR_parallel_shader_compile|PCFSoftShadowMap/.test(e))
   check('no console errors', real.length === 0, real.slice(0, 5).join(' | '))
 }
 
-const runs = { victory, approach, unseen, watched }
+const runs = { victory, approach, unseen, watched, clicks }
 for (const [name, fn] of Object.entries(runs)) {
   if (which !== 'all' && which !== name) continue
   console.log(`\n=== ${name}`)

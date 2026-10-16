@@ -5,7 +5,7 @@ import { BlendFunction, ToneMappingMode, type BloomEffect, type ChromaticAberrat
 import * as THREE from 'three'
 import { QUALITY_PRESETS } from '../config/gameConfig'
 import { useSettings } from '../systems/SettingsManager'
-import { runtime } from '../systems/runtime'
+import { runtime, SIM } from '../systems/runtime'
 
 // Cinematic grade: AO (high), bloom, DoF (cinematics), ACES tone curve, grain, vignette, subtle aberration.
 export function PostFX() {
@@ -44,7 +44,7 @@ export function PostFX() {
 
   return (
     <EffectComposer multisampling={q.msaa} enableNormalPass={false}>
-      <>{q.ao ? <N8AO aoRadius={0.9} intensity={2.2} distanceFalloff={0.8} quality="medium" halfRes /> : null}</>
+      <>{q.ao && !SIM.noAO ? <N8AO aoRadius={0.9} intensity={2.2} distanceFalloff={0.8} quality="medium" halfRes /> : null}</>
       <Bloom ref={bloom} mipmapBlur luminanceThreshold={0.85} luminanceSmoothing={0.2} intensity={0.55} radius={0.62} />
       <>{q.dof ? <DepthOfField ref={dof} worldFocusDistance={2} worldFocusRange={0.6} bokehScale={0} /> : null}</>
       <ChromaticAberration ref={ca} offset={caOffset.current} radialModulation modulationOffset={0.35} />

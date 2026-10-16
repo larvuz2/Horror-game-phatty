@@ -46,7 +46,7 @@ function GameScene() {
       <DeathCinematic />
       <VictoryCinematic />
       <Director />
-      <Dust count={q.dust} />
+      {!SIM.noDust && <Dust count={q.dust} />}
     </>
   )
 }

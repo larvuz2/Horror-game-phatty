@@ -188,8 +188,8 @@ export function Flashlight() {
 
     // Toggle.
     const canUse = g.hasFlashlight && s.pick >= 1 && (g.phase === 'PLAYING') && !runtime.cinematic.kind
-    // Only F (or the mobile button) toggles it. Mouse clicks never change any lighting.
-    if (canUse && input.pressed('KeyF')) {
+    // F, left click (while the mouse is captured) and the mobile button all do the same thing.
+    if (canUse && (input.pressed('KeyF') || (input.clicked && document.pointerLockElement))) {
       if (!fl.powered) {
         audio.play('flashlight_click_empty', { volume: 0.8, bus: 'sfx', reverb: 0.1 })
         if (!s.triedEmpty) {
@@ -254,7 +254,7 @@ export function Flashlight() {
       light.intensity = intensity
     }
     if (beam.current) {
-      beam.current.visible = on && q.beam
+      beam.current.visible = on && q.beam && !SIM.noBeam
       beamMat.uniforms.uIntensity.value = 0.03 * fl.flicker * (1 - runtime.lights.victory)
       beamMat.uniforms.uTime.value = state.clock.elapsedTime
     }
@@ -272,7 +272,8 @@ export function Flashlight() {
         <group rotation-y={Math.PI}>
           <primitive object={heldModel} position={[0, -0.036, 0]} />
         </group>
-        <mesh ref={beam} geometry={beamGeo} material={beamMat} position={[0, 0, -0.14]} renderOrder={10} frustumCulled={false} />
+        {/* The beam haze must never feed ambient occlusion: N8AO would treat the cone as solid and darken the room. */}
+        <mesh ref={beam} userData={{ cannotReceiveAO: true }} geometry={beamGeo} material={beamMat} position={[0, 0, -0.14]} renderOrder={10} frustumCulled={false} />
       </group>
       <primitive object={target} />
       <spotLight

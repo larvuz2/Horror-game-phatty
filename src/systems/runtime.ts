@@ -94,4 +94,7 @@ export const SIM = {
   noPost: params.has('nopost'),
   debug: params.has('debug'),
   skipIntro: params.has('skipintro'),
+  noBeam: params.has('nobeam'),
+  noAO: params.has('noao'),
+  noDust: params.has('nodust'),
 }

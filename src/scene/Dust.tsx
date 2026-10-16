@@ -106,5 +106,5 @@ export function Dust({ count }: { count: number }) {
     u.uLamp.value = (runtime.lights.fixtures.F1 ?? 0) * runtime.lights.master
   })
 
-  return <points geometry={geo} material={mat} frustumCulled={false} renderOrder={9} />
+  return <points userData={{ cannotReceiveAO: true }} geometry={geo} material={mat} frustumCulled={false} renderOrder={9} />
 }
