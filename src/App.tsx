@@ -33,6 +33,8 @@ function lockPointer() {
   }
 }
 
+const isTouch = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches && !window.matchMedia?.('(pointer: fine)').matches
+
 export default function App() {
   const phase = useGame((s) => s.phase)
   const [texturesReady, setTexturesReady] = useState(false)
@@ -146,7 +148,9 @@ export default function App() {
         <button className="screen splash" onClick={unlock}>
           <Logo size="small" />
           <span className="splash-cta">CLICK TO ENTER</span>
-          <span className="splash-note">Best with headphones, lights off.</span>
+          <span className="splash-note">
+            {isTouch ? 'Made for desktop: mouse & keyboard required.' : 'Best with headphones, lights off.'}
+          </span>
         </button>
       ) : (
         <>

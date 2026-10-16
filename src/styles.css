@@ -190,7 +190,7 @@ button:disabled {
   margin: 0;
   font-size: 12px;
   letter-spacing: 0.32em;
-  color: #59605f;
+  color: #6f7675;
   text-transform: uppercase;
 }
 .menu-items {
@@ -245,7 +245,7 @@ button:disabled {
   margin: 0;
   font-size: 10px;
   letter-spacing: 0.3em;
-  color: #3a3e41;
+  color: #474c50;
 }
 
 /* Panels (settings / credits) */

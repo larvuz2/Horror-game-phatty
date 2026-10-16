@@ -177,7 +177,7 @@ export function Lighting() {
   }, [targets])
 
   useEffect(() => {
-    scene.fog = new THREE.FogExp2('#050607', 0.055)
+    scene.fog = new THREE.FogExp2('#050607', 0.048)
     return () => {
       scene.fog = null
     }
@@ -210,12 +210,12 @@ export function Lighting() {
     if (wash.current) wash.current.intensity = 1.6 * lr.practical * master * (1 - lr.victory)
     if (corner.current) corner.current.intensity = 4.2 * lr.cornerBulb * master * (1 - lr.victory)
     if (hemi.current) hemi.current.intensity = (L.ambientIntensity * lr.ambient * master) + L.victoryAmbient * lr.victory
-    if (key.current) key.current.intensity = 34 * lr.cinematicKey
-    if (rim.current) rim.current.intensity = 26 * lr.cinematicRim
+    if (key.current) key.current.intensity = 40 * lr.cinematicKey
+    if (rim.current) rim.current.intensity = 70 * lr.cinematicRim
 
     // Fog density follows cinematics; lighter once the power is back.
     const fog = scene.fog as THREE.FogExp2 | null
-    if (fog) fog.density = 0.055 * runtime.fx.fog * (1 - lr.victory * 0.6)
+    if (fog) fog.density = 0.048 * runtime.fx.fog * (1 - lr.victory * 0.6)
 
     // Fluorescent hum tracks F1's state.
     if (audio.ready) {
@@ -224,7 +224,9 @@ export function Lighting() {
       }
       if (hum.current) {
         const lvl = lr.fixtures.F1 ?? 0
-        const target = phase === 'PLAYING' || phase === 'INTRO' || phase === 'VICTORY_CINEMATIC' ? 0.55 * lvl * master + lr.victory * 0.4 : 0
+        // The hum drains away as you stand face to face with it (proximity event).
+        const duck = 1 - runtime.creature.proximity * 0.85
+        const target = phase === 'PLAYING' || phase === 'INTRO' || phase === 'VICTORY_CINEMATIC' ? 0.55 * lvl * master * duck + lr.victory * 0.4 : 0
         hum.current.setVolume(target, 0.05)
       }
     }
@@ -259,7 +261,7 @@ export function Lighting() {
       <spotLight ref={corner} position={[CORNER_BULB.pos[0], CORNER_BULB.pos[1] - 0.05, CORNER_BULB.pos[2] - 0.18]} angle={0.9} penumbra={0.9} distance={6} decay={2} intensity={4} color="#c3ccd0" />
       <hemisphereLight ref={hemi} args={['#3d4650', '#0a0a0b', L.ambientIntensity]} />
       <spotLight ref={key} position={[STAGE.pos[0] + 0.35, 3.75, STAGE.pos[2] + 1.0]} angle={0.42} penumbra={0.9} distance={8} decay={2} intensity={0} color="#aebbc4" />
-      <spotLight ref={rim} position={[STAGE.pos[0] - 0.4, 3.2, STAGE.pos[2] - 2.8]} angle={0.5} penumbra={0.8} distance={8} decay={2} intensity={0} color="#8c9aa6" />
+      <spotLight ref={rim} position={[STAGE.pos[0] + 0.9, 3.4, STAGE.pos[2] - 2.6]} angle={0.55} penumbra={0.8} distance={8} decay={2} intensity={0} color="#8c9aa6" />
     </group>
   )
 }

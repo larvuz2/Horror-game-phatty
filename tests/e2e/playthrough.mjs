@@ -13,7 +13,7 @@ const waitPhase = (page, phase, timeout = 120000) =>
   page.waitForFunction((p) => window.__DLA.game.getState().phase === p, phase, { timeout }).then(() => true, () => false)
 
 async function freshGame() {
-  const ctx = await launch({ url: 'http://localhost:5173/?debug&maxdt=0.25&skipintro&dpr=0.5', quality: 'low', width: 640, height: 360 })
+  const ctx = await launch({ url: (process.env.BASE || 'http://localhost:5173') + '/?debug&maxdt=0.25&skipintro&dpr=0.5', quality: 'low', width: 640, height: 360 })
   await enterGame(ctx.page)
   return ctx
 }

@@ -49,15 +49,15 @@ export const GAME_CONFIG = {
 
   lighting: {
     exposure: 1.0,
-    flashlightAngle: 0.27, // radians (half angle ~15.5 deg => 31 deg beam)
+    flashlightAngle: 0.31, // radians (half angle ~18 deg => 35 deg beam)
     flashlightRange: 9.5,
-    flashlightIntensity: 10.5,
-    flashlightDecay: 1.45,
+    flashlightIntensity: 13,
+    flashlightDecay: 1.4,
     flashlightColor: '#ffe9cf',
     fluorescentColor: '#c7d4d3',
     fluorescentIntensity: 42,
     practicalIntensity: 12,
-    ambientIntensity: 0.15,
+    ambientIntensity: 0.2,
     victoryAmbient: 0.55,
   },
 
