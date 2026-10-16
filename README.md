@@ -52,8 +52,10 @@ Connect the GitHub repository in Netlify and deploy the default branch; no envir
   into a featureless void and emissive eyes that only appear in the death cinematic.
   - `VisibilityDetector.ts` samples 11 points over its silhouette and tests them against the camera
     frustum (with a conservative margin) and occluders (pillars).
-  - `CreatureAI.ts` repositions only after continuous loss of sight, only to nodes that are hidden
-    from the camera, reachable, and closer to the player. It never moves while observed.
+  - `CreatureAI.ts`: about 0.8 s after it leaves your view it steps straight toward you (longer
+    strides from far away, shorter up close), and keeps stepping every ~1 s while you look away.
+    Seen from the player every point on that line has the same bearing, so the new spot is out of
+    view too; visibility is re-checked anyway. It never moves while observed.
   - Walking into it while watching triggers a proximity event (the hum drains away, a pressure tone
     rises, movement slows) and then the death cinematic. If it reaches you unseen, a brief sound
     warns you a split second before it does.

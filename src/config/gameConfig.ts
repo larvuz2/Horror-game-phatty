@@ -22,14 +22,16 @@ export const GAME_CONFIG = {
 
   creature: {
     height: 2.38,
-    activationDelay: 25, // s of play before the creature wakes even without the flashlight
+    activationDelay: 3, // s of play before the creature starts hunting
     activationDistance: 5, // m walked from the start that wakes it
-    firstMoveDelay: 2.4, // s of continuous lost visibility before the first move
-    moveDelayMin: 1.3, // later moves
-    moveDelayMax: 1.9,
-    minMoveInterval: 1.5,
-    stepMin: 1.3, // meters per reposition
-    stepMax: 2.1,
+    firstMoveDelay: 0.8, // s out of view before it moves (every look-away of ~1 s counts)
+    moveDelayMin: 0.9, // further moves while you keep looking away
+    moveDelayMax: 1.25,
+    minMoveInterval: 0.8,
+    stepMin: 1.1, // meters per reposition (near)
+    stepFactor: 0.17, // step = distance * factor, clamped: big strides from far away, small ones up close
+    minLandDistance: 0.95,
+    stepMax: 2.4,
     aggressionStepBonus: 0.3, // extra step length once the player holds the batteries
     progressMin: 0.7, // each move must close at least this much distance
     killDistanceUnseen: 1.3, // a move that would land this close triggers the attack

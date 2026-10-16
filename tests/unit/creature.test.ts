@@ -85,6 +85,10 @@ describe('CreatureBrain', () => {
           if (firstMoveAt < 0) firstMoveAt = t
           const d = brain.distanceTo(player)
           expect(d).toBeLessThan(lastDist)
+          // It comes straight at the player (within a small sideways nudge).
+          const mv = new THREE.Vector2(e.to.x - e.from.x, e.to.z - e.from.z).normalize()
+          const toP = new THREE.Vector2(player.x - e.from.x, player.z - e.from.z).normalize()
+          expect(mv.dot(toP)).toBeGreaterThan(Math.cos(THREE.MathUtils.degToRad(25)))
           expect(e.from.distanceTo(e.to)).toBeLessThanOrEqual(GAME_CONFIG.creature.stepMax + 0.81)
           const pts = creatureSamplePoints(e.to, brain.yaw, GAME_CONFIG.creature.height)
           expect(isObserved(pts, v, OCCLUDERS, GAME_CONFIG.creature.viewMarginDeg, 30)).toBe(false)
@@ -95,6 +99,22 @@ describe('CreatureBrain', () => {
     }
     expect(firstMoveAt).toBeGreaterThanOrEqual(GAME_CONFIG.creature.firstMoveDelay)
     expect(attacked).toBe(true)
+  })
+
+  it('moves closer after every short look-away', () => {
+    const brain = new CreatureBrain(new THREE.Vector3(0.6, 0, -7.1), seeded(5))
+    const player = new THREE.Vector3(0.2, 0, 7.4)
+    const away = view(0.2, 7.4, Math.PI)
+    const toward = () => view(0.2, 7.4, Math.atan2(-(brain.pos.x - 0.2), -(brain.pos.z - 7.4)))
+    let t = 0
+    let last = brain.distanceTo(player)
+    for (let glance = 0; glance < 4; glance++) {
+      for (let i = 0; i < 24; i++) brain.update({ ...ctxBase, time: (t += 0.05), playerPos: player, view: away }) // 1.2 s away
+      for (let i = 0; i < 20; i++) brain.update({ ...ctxBase, time: (t += 0.05), playerPos: player, view: toward() }) // look back
+      const d = brain.distanceTo(player)
+      expect(d).toBeLessThan(last - 1)
+      last = d
+    }
   })
 
   it('kills a player who walks into it while watching', () => {

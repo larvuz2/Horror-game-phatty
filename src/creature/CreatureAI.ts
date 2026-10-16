@@ -130,7 +130,9 @@ export class CreatureBrain {
     }
 
     if (this.observed) {
+      // Every new look-away starts the short countdown again.
       this.unobservedTime = 0
+      this.nextDelay = C.firstMoveDelay
       return ev
     }
     this.unobservedTime += ctx.dt
@@ -155,39 +157,35 @@ export class CreatureBrain {
     ev.push({ type: 'attackWarning' })
   }
 
-  // Choose the next hidden position: closer to the player, reachable, never in view.
+  // Next position: straight along the line toward the player. Seen from the player, every point on
+  // that line has the same bearing, so if the creature is out of view the new spot is too. Small
+  // sideways nudges are only used when a prop blocks the straight line; visibility is always re-checked.
   pickTarget(ctx: BrainContext, dist: number): THREE.Vector3 | null {
-    const stepMax = C.stepMax + (ctx.aggressive ? C.aggressionStepBonus : 0)
-    let best: THREE.Vector3 | null = null
-    let bestScore = -Infinity
-    for (const pass of [0, 1]) {
-      const minProgress = pass === 0 ? C.progressMin : 0.25
-      const maxStep = pass === 0 ? stepMax : stepMax + 0.8
-      for (const n of this.nodes) {
-        const d = this.distanceTo(n)
-        if (d < C.stepMin * (pass === 0 ? 1 : 0.6) || d > maxStep) continue
-        const dp = Math.hypot(n.x - ctx.playerPos.x, n.z - ctx.playerPos.z)
-        const progress = dist - dp
-        if (progress < minProgress) continue
-        if (dp < 0.85) continue // never land inside the player
-        if (ctx.dynamicPositions.some((q) => Math.hypot(q.x - n.x, q.z - n.z) < 0.42)) continue
-        if (!this.pathClear(this.pos, n)) continue
-        const yaw = Math.atan2(ctx.playerPos.x - n.x, ctx.playerPos.z - n.z)
-        if (this.visibleAt(n, yaw, ctx.view, this.pts2)) continue
-        // Prefer big progress, a little randomness, and spots behind the player.
-        const toN = new THREE.Vector3(n.x - ctx.view.pos.x, 0, n.z - ctx.view.pos.z).normalize()
-        const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(ctx.view.quat)
-        fwd.y = 0
-        fwd.normalize()
-        const behind = -toN.dot(fwd) // 1 = directly behind
-        const score = progress + behind * 0.6 + this.rng() * 0.5
-        if (score > bestScore) {
-          bestScore = score
-          best = n
-        }
+    const dx = ctx.playerPos.x - this.pos.x
+    const dz = ctx.playerPos.z - this.pos.z
+    const len = Math.hypot(dx, dz)
+    if (len < 1e-3) return null
+    const dir = { x: dx / len, z: dz / len }
+    const perp = { x: -dir.z, z: dir.x }
+    const bonus = ctx.aggressive ? C.aggressionStepBonus : 0
+    const step = THREE.MathUtils.clamp(dist * C.stepFactor, C.stepMin, C.stepMax + bonus)
+    const s = Math.min(step, dist - C.minLandDistance)
+    if (s < 0.25) return null
+    const cand = new THREE.Vector3()
+    const margin = 0.45
+    for (const scale of [1, 0.8, 0.6, 0.4]) {
+      for (const off of [0, 0.3, -0.3, 0.6, -0.6]) {
+        cand.set(this.pos.x + dir.x * s * scale + perp.x * off, 0, this.pos.z + dir.z * s * scale + perp.z * off)
+        if (cand.x < ROOM.minX + margin || cand.x > ROOM.maxX - margin || cand.z < ROOM.minZ + margin || cand.z > ROOM.maxZ - margin) continue
+        const dp = Math.hypot(ctx.playerPos.x - cand.x, ctx.playerPos.z - cand.z)
+        if (dp > dist - 0.25 || dp < 0.85) continue
+        if (this.obstacles.some((b) => cand.x > b.min[0] - 0.3 && cand.x < b.max[0] + 0.3 && cand.z > b.min[2] - 0.3 && cand.z < b.max[2] + 0.3)) continue
+        if (ctx.dynamicPositions.some((q) => Math.hypot(q.x - cand.x, q.z - cand.z) < 0.35)) continue
+        const yaw = Math.atan2(ctx.playerPos.x - cand.x, ctx.playerPos.z - cand.z)
+        if (this.visibleAt(cand, yaw, ctx.view, this.pts2)) continue
+        return cand.clone()
       }
-      if (best) break
     }
-    return best
+    return null
   }
 }
