@@ -51,10 +51,10 @@ export const GAME_CONFIG = {
 
   lighting: {
     exposure: 1.0,
-    flashlightAngle: 0.25, // radians (half angle ~14 deg => 29 deg beam): a beam, not room light
-    flashlightRange: 8.5,
-    flashlightIntensity: 14,
-    flashlightDecay: 1.8,
+    flashlightAngle: 0.29, // radians (half angle ~17 deg => 33 deg beam)
+    flashlightRange: 13,
+    flashlightIntensity: 34, // a strong, clearly visible pool; it only lights what it points at
+    flashlightDecay: 1.4,
     flashlightColor: '#ffe9cf',
     fluorescentColor: '#c7d4d3',
     fluorescentIntensity: 42,

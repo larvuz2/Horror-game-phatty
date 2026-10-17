@@ -255,7 +255,7 @@ export function Flashlight() {
     }
     if (beam.current) {
       beam.current.visible = on && q.beam && !SIM.noBeam
-      beamMat.uniforms.uIntensity.value = 0.03 * fl.flicker * (1 - runtime.lights.victory)
+      beamMat.uniforms.uIntensity.value = 0.06 * fl.flicker * (1 - runtime.lights.victory)
       beamMat.uniforms.uTime.value = state.clock.elapsedTime
     }
   }, -4)
